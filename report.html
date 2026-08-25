@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>탐구주제 프롬프트</title>
+<style>
+  *{box-sizing:border-box;}
+  body{
+    margin:0;background:#f5f6fa;color:#22262f;
+    font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic",-apple-system,"Segoe UI",sans-serif;
+    line-height:1.7;
+  }
+  .wrap{max-width:760px;margin:0 auto;padding:36px 16px 64px;}
+  h1{font-size:24px;font-weight:800;margin:0 0 6px;text-align:center;}
+  .lead{text-align:center;color:#6b7280;font-size:14px;margin:0 0 28px;}
+
+  .box{background:#fff;border:1px solid #e5e7ef;border-radius:16px;padding:20px;margin-bottom:20px;}
+  .num{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:26px;height:26px;border-radius:8px;background:#4f6ef7;color:#fff;
+    font-size:14px;font-weight:800;margin-right:8px;
+  }
+  h2{font-size:17px;font-weight:800;margin:0 0 4px;display:flex;align-items:center;}
+  .sub{color:#6b7280;font-size:13px;margin:0 0 16px;padding-left:34px;}
+
+  label{display:block;font-size:13px;font-weight:700;margin:0 0 5px;}
+  .field{margin-bottom:12px;}
+  .row{display:flex;gap:8px;flex-wrap:wrap;}
+  .row input{flex:1 1 140px;min-width:0;}
+  input,textarea,select{
+    width:100%;padding:10px 12px;border:1.5px solid #e5e7ef;border-radius:10px;
+    font-size:14px;font-family:inherit;color:#22262f;background:#fcfdff;
+  }
+  input:focus,textarea:focus,select:focus{outline:none;border-color:#4f6ef7;background:#fff;}
+  textarea{resize:vertical;min-height:56px;}
+  select{max-width:140px;}
+
+  pre{
+    margin:16px 0 0;background:#f8f9fc;border:1px solid #e8ebf3;border-radius:12px;
+    padding:16px;font-family:inherit;font-size:13.5px;line-height:1.75;
+    white-space:pre-wrap;word-break:break-word;color:#2b3040;
+  }
+  mark{background:#fff3b8;color:#8a6d00;border-radius:3px;padding:0 2px;}
+
+  button{
+    width:100%;margin-top:12px;height:50px;border:0;border-radius:12px;
+    background:#4f6ef7;color:#fff;font-size:15px;font-weight:800;
+    font-family:inherit;cursor:pointer;transition:background .15s,transform .1s;
+  }
+  button:hover{background:#3f5ce0;}
+  button:active{transform:scale(.98);}
+  button.ok{background:#16b8a6;}
+
+  .note{
+    margin:12px 0 0;background:#fff8e8;border:1px solid #ffe6ad;border-radius:10px;
+    padding:11px 13px;font-size:12.8px;color:#8a6a1f;line-height:1.6;
+  }
+  .tip{color:#8a8f9c;font-size:12.5px;text-align:center;margin-top:26px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>탐구주제 프롬프트</h1>
+  <p class="lead">빈칸을 채우고 복사해서 AI(챗GPT·클로드·제미나이)에 붙여넣으세요</p>
+
+  <!-- 1 -->
+  <div class="box">
+    <h2><span class="num">1</span>탐구주제 3개 추천받기</h2>
+    <p class="sub">관심사·키워드·배운 개념·최근 이슈를 연결해 주제를 뽑아줍니다</p>
+
+    <div class="field">
+      <label>학년</label>
+      <select id="grade">
+        <option value="">선택</option>
+        <option value="1">1학년</option>
+        <option value="2">2학년</option>
+        <option value="3">3학년</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>관심 계열 / 학과 / 직업</label>
+      <div class="row">
+        <input id="job1" placeholder="예) 공학계열">
+        <input id="job2" placeholder="예) 환경공학과">
+        <input id="job3" placeholder="예) 환경연구원">
+      </div>
+    </div>
+
+    <div class="field">
+      <label>내가 고른 키워드</label>
+      <div class="row">
+        <input id="key1" placeholder="예) 미세먼지">
+        <input id="key2" placeholder="예) 도시 열섬">
+        <input id="key3" placeholder="예) 데이터 분석">
+      </div>
+    </div>
+
+    <div class="field">
+      <label>이번 학기에 배운 과목명 - 단원 또는 개념</label>
+      <input id="subject" placeholder="예) 통합과학 - 생태계와 환경">
+    </div>
+
+    <div class="field">
+      <label>최근에 본 뉴스나 트렌드, 이슈</label>
+      <textarea id="news" placeholder="예) 올여름 우리 지역 폭염 일수가 역대 최다였다는 뉴스"></textarea>
+    </div>
+
+    <pre id="p1"></pre>
+    <button data-copy="p1">📎 복사하기</button>
+  </div>
+
+  <!-- 2 -->
+  <div class="box">
+    <h2><span class="num">2</span>탐구보고서 목차 짜기</h2>
+    <p class="sub">탐구동기 – 탐구과정 – 탐구결과 구조로 목차를 만들어줍니다</p>
+
+    <div class="field">
+      <label>내가 정한 탐구주제</label>
+      <textarea id="topic" placeholder="예) 우리 학교 옥상 온도는 운동장보다 얼마나 높을까?"></textarea>
+    </div>
+
+    <div class="field">
+      <label>이 주제를 고른 이유 (탐구동기)</label>
+      <textarea id="why" placeholder="예) 체육 시간에 운동장이 유난히 더워서, 표면 재질에 따라 온도가 다른지 궁금했다"></textarea>
+    </div>
+
+    <div class="field">
+      <label>보고서 분량</label>
+      <select id="pages">
+        <option>2~3</option>
+        <option>1~2</option>
+        <option>3~4</option>
+        <option>4~5</option>
+      </select>
+    </div>
+
+    <pre id="p2"></pre>
+    <button data-copy="p2">📎 복사하기</button>
+    <p class="note">💡 목차는 <b>대주제 1개</b>로 먼저 받아 보세요. 더 넓게 다루고 싶으면 답을 받은 뒤 <b>"대주제를 2개로 늘려줘"</b>라고 이어서 요청하면 됩니다.</p>
+  </div>
+
+  <p class="tip">1번으로 주제를 고른 뒤 → 2번으로 목차를 만드세요</p>
+</div>
+
+<script>
+var $ = function(id){ return document.getElementById(id); };
+var v = function(id, blank){ return $(id).value.trim() || (blank || "[   ]"); };
+
+function make1(){
+  return "나는 고등학교 " + v("grade") + "학년 학생이야.\n"
+    + "· 관심 계열/학과/직업 : " + v("job1") + ", " + v("job2") + ", " + v("job3") + "\n"
+    + "· 내가 고른 키워드 : " + v("key1") + ", " + v("key2") + ", " + v("key3") + "\n"
+    + "· 이번 학기에 배운 과목명-단원 또는 개념 : " + v("subject") + "\n"
+    + "· 최근에 본 뉴스나 트렌드, 이슈 : " + v("news") + "\n\n"
+    + "위 네 가지를 서로 연결해서, 고등학생이 실제로 조사할 수 있는\n"
+    + "탐구주제 3개를 추천해줘. 각 주제마다 아래를 표로 정리해줘.\n\n"
+    + "① 탐구주제 — 질문 형태의 한 문장으로\n"
+    + "② 이 주제가 내 키워드·교과 개념·이슈와 어떻게 연결되는지\n"
+    + "③ 탐구방법 — 문헌조사 / 통계 / 설문 / 실험·관찰 중 무엇을 어떻게\n"
+    + "④ 연계 교과와 활용할 개념\n"
+    + "⑤ 이 주제로 쓸 때 예상되는 어려움\n\n"
+    + "단, 너무 크고 추상적인 주제는 빼고 우리 학교·우리 동네·내 일상에서\n"
+    + "확인할 수 있는 범위로 좁혀줘.\n"
+    + "그리고 고등학생이 바로 이해할 수 있는 쉬운 말로 써주고, 어려운 용어는 괄호 안에 뜻을 짧게 풀어줘.";
+}
+
+function make2(){
+  return "내가 정한 탐구주제는 " + v("topic", "[                    ]") + " 이고,\n"
+    + "이 주제를 고른 이유(탐구동기)는 " + v("why", "[                    ]") + " 이야.\n"
+    + "이 주제로 A4 " + $("pages").value + "장 분량의 탐구보고서를 쓰려고 해.\n\n"
+    + "“탐구동기 – 탐구과정 – 탐구결과” 구조에 맞춰 목차를 짜줘.\n\n"
+    + "· 탐구동기 : 어떤 궁금증에서 출발했는지 한 문단\n"
+    + "· 탐구과정 : 대주제 1개, 소항목 3~4개\n"
+    + "              소항목마다 무엇으로 확인할지 표시\n"
+    + "              (문헌조사 / 통계 / 설문 / 실험·관찰)\n"
+    + "· 탐구결과 : ①알게 된 것 ②균형 잡힌 판단 ③전망\n"
+    + "              ④나와의 연결 ⑤후속 활동 제안\n\n"
+    + "그리고 목차 항목마다 “여기에 어떤 내용을 넣을지”를 한 줄씩 같이 적어주고,\n"
+    + "용어 정의가 필요한 항목에는 (용어 정의) 표시를 해줘.\n"
+    + "그리고 고등학생이 바로 이해할 수 있는 쉬운 말로 써주고, 어려운 용어는 괄호 안에 뜻을 짧게 풀어줘.";
+}
+
+function paint(){
+  var mark = function(s){
+    return s.replace(/&/g,"&amp;").replace(/</g,"&lt;")
+            .replace(/\[\s*\]/g, "<mark>$&</mark>");
+  };
+  $("p1").innerHTML = mark(make1());
+  $("p2").innerHTML = mark(make2());
+}
+
+document.querySelectorAll("input,textarea,select").forEach(function(el){
+  el.addEventListener("input", paint);
+  el.addEventListener("change", paint);
+});
+
+document.querySelectorAll("button[data-copy]").forEach(function(btn){
+  btn.addEventListener("click", function(){
+    var str = btn.dataset.copy === "p1" ? make1() : make2();
+    var done = function(){
+      btn.textContent = "✅ 복사 완료!";
+      btn.classList.add("ok");
+      setTimeout(function(){ btn.textContent = "📎 복사하기"; btn.classList.remove("ok"); }, 1600);
+    };
+    if(navigator.clipboard && window.isSecureContext){
+      navigator.clipboard.writeText(str).then(done, function(){ if(legacy(str)) done(); });
+    }else if(legacy(str)){ done(); }
+  });
+});
+
+function legacy(str){
+  var ta = document.createElement("textarea");
+  ta.value = str; ta.style.position = "fixed"; ta.style.top = "-999px";
+  document.body.appendChild(ta); ta.select();
+  var ok = false;
+  try{ ok = document.execCommand("copy"); }catch(e){}
+  document.body.removeChild(ta);
+  return ok;
+}
+
+paint();
+</script>
+</body>
+</html>
