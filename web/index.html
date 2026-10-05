@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f4ede2">
+<title>나의 목표 대학 진학 계획서</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌼</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  :root{--bg:#f4ede2;--bg-deep:#ebe1d0;--paper:#fbf6ec;--ink:#1b1a18;--ink-soft:#3d3a36;--muted:#7a716a;--line:#d9cfbe;--line-soft:#e6ddcc;--accent:#2a3b2e;--accent-warm:#b3753a;--gold:#c9a35b}
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{font-family:Pretendard,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;background:var(--bg);color:var(--ink);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased;letter-spacing:-.01em}
+  .serif{font-family:"Noto Serif KR",serif}
+  .topbar{position:sticky;top:0;z-index:20;background:rgba(244,237,226,.94);backdrop-filter:blur(8px);border-bottom:1px solid var(--line-soft)}
+  .topbar-inner{max-width:560px;margin:0 auto;padding:12px 16px 0}
+  .brand{display:flex;align-items:baseline;gap:10px}
+  .brand-name{font-family:"Noto Serif KR",serif;font-size:24px;font-weight:700;letter-spacing:-.02em}
+  .brand-sub{font-size:12px;color:var(--muted);letter-spacing:.14em;text-transform:uppercase}
+  .tabs{display:flex;gap:6px;padding:10px 0 12px}
+  .tab{flex:1;padding:11px 0;border-radius:999px;border:1px solid var(--line);background:var(--paper);color:var(--ink-soft);font:600 15px Pretendard,sans-serif}
+  .tab.on{background:var(--accent);border-color:var(--accent);color:var(--paper)}
+  .wrap{max-width:560px;margin:0 auto;padding:22px 16px 170px}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;background:var(--paper);border:1px solid var(--line);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft)}
+  .eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--accent-warm)}
+  h1{font-family:"Noto Serif KR",serif;font-size:30px;line-height:1.2;font-weight:600;letter-spacing:-.03em;margin-top:14px}
+  h1 em{font-style:italic;color:var(--accent)}
+  .lead{font-size:15px;color:var(--ink-soft);margin-top:10px}
+  .legend{display:flex;flex-wrap:wrap;gap:8px 14px;margin-top:16px;padding-top:14px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
+  .b{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600;padding:3px 10px;border-radius:999px;white-space:nowrap}
+  .b.f{background:var(--accent);color:var(--paper)}
+  .b.s{background:transparent;color:var(--accent-warm);border:1px solid var(--accent-warm)}
+  .field{width:100%;font:500 16px Pretendard,sans-serif;color:var(--ink);padding:12px 14px;border:1px solid var(--line);border-radius:8px;background:#fffdf8}
+  .field:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(42,59,46,.12)}
+  .name{margin-top:18px}
+  .goal{display:none;margin-top:8px}.goal.on{display:block}
+  .q{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:16px;margin-top:12px}
+  .q .top{display:flex;align-items:flex-start;gap:10px}
+  .q .no{font-family:"Noto Serif KR",serif;font-style:italic;font-size:15px;color:var(--accent-warm);min-width:22px;line-height:1.5}
+  .q .t{font-family:"Noto Serif KR",serif;font-weight:600;font-size:17px;flex:1;line-height:1.4}
+  .q .where{font-size:13px;color:var(--muted);margin:4px 0 10px 32px;line-height:1.5}
+  .q .where b{color:var(--ink-soft)}
+  .row2{display:flex;align-items:center;gap:8px}
+  .row2 span{color:var(--muted)}
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{padding:9px 14px;border:1px solid var(--line);border-radius:999px;background:#fffdf8;font:500 15px Pretendard,sans-serif;color:var(--ink-soft)}
+  .chip.on{background:var(--accent-warm);border-color:var(--accent-warm);color:#fff}
+  .save .guide{text-align:center;font-size:13px;color:var(--ink-soft);margin-bottom:8px}
+  .save .guide b{color:var(--accent-warm)}
+  .tab small{font-weight:500;opacity:.8;margin-left:4px}
+  .save{position:fixed;left:0;right:0;bottom:0;z-index:15;padding:14px 16px calc(14px + env(safe-area-inset-bottom));background:var(--bg);border-top:1px solid var(--line-soft);box-shadow:0 -10px 20px -12px rgba(38,30,18,.25)}
+  .btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;max-width:528px;margin:0 auto;padding:16px;border:0;border-radius:999px;font:600 17px Pretendard,sans-serif;background:var(--accent);color:var(--paper);box-shadow:0 12px 24px -10px rgba(38,30,18,.45)}
+  .btn:active{transform:translateY(1px)}
+  .modal{position:fixed;inset:0;background:rgba(27,26,24,.82);display:none;flex-direction:column;align-items:center;padding:20px 16px calc(20px + env(safe-area-inset-bottom));z-index:30;overflow:auto}
+  .modal.on{display:flex}
+  .modal img{width:100%;max-width:420px;border-radius:6px;box-shadow:0 30px 60px -20px rgba(0,0,0,.5)}
+  .modal .tip{color:var(--paper);text-align:center;font-size:14px;line-height:1.55;margin:0 0 12px}
+  .modal .btns{display:flex;gap:8px;width:100%;max-width:420px;margin-top:14px}
+  .modal .btns button{flex:1;padding:14px;border-radius:999px;font:600 15px Pretendard,sans-serif;border:0}
+  .dl{background:var(--accent-warm);color:#fff}.close{background:var(--paper);color:var(--ink)}
+  .toast{position:fixed;left:50%;top:42%;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:12px 18px;border-radius:999px;z-index:40;font-size:14px}
+  .conv{margin-top:10px;padding:12px 14px;border-radius:8px;background:var(--bg-deep);font-size:14px;color:var(--ink-soft);line-height:1.5}
+  .conv b{font-family:"Noto Serif KR",serif;font-size:19px;color:var(--accent)}
+  .conv .s{display:block;font-size:12px;color:var(--muted);margin-top:2px}
+  .foot{margin-top:22px;font-size:12px;color:var(--muted);text-align:center}
+</style>
+</head>
+<body>
+<header class="topbar"><div class="topbar-inner">
+  <div class="brand"><span class="brand-name">진학 계획서</span><span class="brand-sub">2028 · 4교시 실습</span></div>
+  <div class="tabs"><button class="tab on" data-g="0">목표 1<small></small></button><button class="tab" data-g="1">목표 2<small></small></button></div>
+</div></header>
+
+<main class="wrap">
+  <span class="eyebrow"><span class="dot"></span>Top-Down 계획법</span>
+  <h1>나의 목표 대학 <em>2곳</em><br>진학 계획서</h1>
+  <p class="lead">전형은 <b>학생부교과(일반)</b> 기준이에요. <b>목표 1, 2 탭을 모두 채운 뒤</b> 맨 아래 <b>저장</b>을 누르면 피라미드 이미지로 휴대폰에 저장돼요.</p>
+  <div class="legend"><span><span class="b f">🔍 대학어디가</span> 어디가에서 찾기</span><span><span class="b s">✏️ 스스로</span> 내가 정하기</span></div>
+  <input class="field name" id="name" type="text" placeholder="이름 (예: 1학년 3반 김제주)" autocomplete="off">
+  <div id="goals"></div>
+  <p class="foot">입력 내용은 이 휴대폰에만 남아요 · 강지애</p>
+</main>
+
+<div class="save"><p class="guide">⚠️ <b>목표 1 · 목표 2</b>를 모두 채운 뒤 눌러요</p><button class="btn" id="saveBtn">저장 · 이미지로 만들기</button></div>
+
+<div class="modal" id="modal">
+  <p class="tip">아래 버튼으로 저장해요.<br>안 되면 <b>이미지를 길게 눌러 ‘이미지 저장’</b>을 눌러요.</p>
+  <img id="preview" alt="나의 진학 계획 피라미드">
+  <div class="btns"><button class="dl" id="dlBtn">휴대폰에 저장</button><button class="close" id="closeBtn">닫고 고치기</button></div>
+</div>
+<canvas id="cv" width="1080" height="1920" hidden></canvas>
+
+<script>
+const AREAS=['국어','수학','영어','사회/과학탐구','직업탐구'];
+const Q=[
+ {k:'univ',t:'대학 · 학과',src:'s',where:'교재 9p에 적은 목표 ①② (어디가에 ★ 등록한 곳)',ph:['제주대학교 경영학과','제주대학교 회계학과']},
+ {k:'cut',t:'전년도 70% 컷 (9등급)',src:'f',where:'대학별성적분석 → 분석하기 → 교과등급 <b>70%</b> 숫자',ph:['3.13','4.66'],num:1},
+ {k:'min',t:'수능 최저',src:'f',where:'분석결과 화면 · 모르면 2교시 제주대 슬라이드',ph:['2개 영역 합 9','2개 영역 합 9']},
+ {k:'grade',t:'지금 내 내신 → 목표 내신 (5등급)',src:'s',where:'지금 = 교재 9p 메모 · 목표 = 위 5등급 환산보다 좋게',two:1,ph:[['3.0','2.3'],['3.0','3.0']]},
+ {k:'area',t:'수능 준비 영역 (2개 고르기)',src:'s',where:'수능 최저에 맞춰 자신 있는 영역',chips:1},
+ {k:'rec',t:'생기부 준비 (창체 · 동아리 · 독서)',src:'s',where:'3교시에 세운 창체 계획',ph:['경제교실 보고서 · 경영 진로독서','회계 원리 세특 · 회계동아리']},
+ {k:'todo',t:'이번 학기 바로 할 일',src:'s',where:'아주 구체적으로! 예: 매일 영어 단어 30개',ph:['매일 영어 단어 30개','회계 원리 복습 · 전산회계 준비']}
+];
+const S={name:'',g:[{},{}]};
+try{const d=JSON.parse(localStorage.getItem('plan2028')||'null');if(d&&d.g)Object.assign(S,d);}catch(e){}
+const persist=()=>{try{localStorage.setItem('plan2028',JSON.stringify(S));}catch(e){}};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function toast(m){const d=document.createElement('div');d.className='toast';d.textContent=m;document.body.appendChild(d);setTimeout(()=>d.remove(),1500);}
+
+const CUM9=[0,4,11,23,40,60,77,89,96,100];
+function to5(g){g=parseFloat(g);if(isNaN(g)||g<1||g>9)return null;const k=Math.min(8,Math.floor(g));
+  const p=CUM9[k]+(g-k)*(CUM9[k+1]-CUM9[k]);const band=p<=10?1:p<=34?2:p<=66?3:p<=90?4:5;return {p:Math.round(p),band};}
+function convHTML(g){const r=to5(g);if(!r)return '<span class="s">9등급 숫자를 넣으면 5등급으로 바꿔 줘요</span>';
+  return '5등급제로 바꾸면 <b>'+r.band+'등급대</b> <span class="s">9등급 '+g+' = 상위 약 '+r.p+'% · 단순 환산이라 참고용이에요</span>';}
+function filled(v){return [v.univ,v.cut,v.min,v.now&&v.target,v.area&&v.area.length,v.rec,v.todo].filter(Boolean).length;}
+function progress(){document.querySelectorAll('.tab').forEach((t,i)=>{const n=filled(S.g[i]);t.querySelector('small').textContent=n===7?'✓':n+'/7';});}
+function showTab(i){document.querySelectorAll('.tab').forEach((x,j)=>x.classList.toggle('on',j==i));document.querySelectorAll('.goal').forEach((g,j)=>g.classList.toggle('on',j==i));
+  window.scrollTo({top:document.getElementById('goals').offsetTop-130,behavior:'smooth'});}
+const goals=document.getElementById('goals');
+[0,1].forEach(gi=>{
+  const box=document.createElement('div');box.className='goal'+(gi?'':' on');const v=S.g[gi];
+  Q.forEach((q,i)=>{
+    let input;
+    if(q.chips)input='<div class="chips">'+AREAS.map(a=>'<button class="chip'+((v.area||[]).includes(a)?' on':'')+'" data-a="'+a+'">'+a+'</button>').join('')+'</div>';
+    else if(q.two)input='<div class="row2"><input class="field" type="number" inputmode="decimal" step="0.1" data-k="now" placeholder="지금 '+q.ph[gi][0]+'" value="'+esc(v.now||'')+'"><span>→</span><input class="field" type="number" inputmode="decimal" step="0.1" data-k="target" placeholder="목표 '+q.ph[gi][1]+'" value="'+esc(v.target||'')+'"></div>';
+    else input='<input class="field" type="'+(q.num?'number':'text')+'" '+(q.num?'inputmode="decimal" step="0.01"':'')+' data-k="'+q.k+'" placeholder="예) '+q.ph[gi]+'" value="'+esc(v[q.k]||'')+'" autocomplete="off">';
+    if(q.k==='cut')input+='<div class="conv"></div>';
+    box.insertAdjacentHTML('beforeend','<div class="q"><div class="top"><span class="no">0'+(i+1)+'</span><span class="t">'+q.t+'</span>'+(q.src==='f'?'<span class="b f">🔍 대학어디가</span>':'<span class="b s">✏️ 스스로</span>')+'</div><div class="where">'+q.where+'</div>'+input+'</div>');
+  });
+  box.addEventListener('input',e=>{const k=e.target.dataset.k;if(k){S.g[gi][k]=e.target.value;persist();progress();if(k==='cut')box.querySelector('.conv').innerHTML=convHTML(e.target.value);}});
+  box.querySelector('.conv').innerHTML=convHTML(v.cut||'');
+  box.addEventListener('click',e=>{const c=e.target.closest('.chip');if(!c)return;
+    const a=c.dataset.a,arr=S.g[gi].area=S.g[gi].area||[],ix=arr.indexOf(a);
+    if(ix>=0)arr.splice(ix,1);else{if(arr.length>=3){toast('최대 3개까지 골라요');return;}arr.push(a);}
+    c.classList.toggle('on',arr.includes(a));persist();progress();});
+  goals.appendChild(box);
+});
+const nameEl=document.getElementById('name');nameEl.value=S.name||'';nameEl.addEventListener('input',()=>{S.name=nameEl.value;persist();progress();});
+document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>showTab(+t.dataset.g));
+progress();
+
+/* ---------- 피라미드 이미지 ---------- */
+const C={bg:'#f4ede2',deep:'#ebe1d0',paper:'#fbf6ec',ink:'#1b1a18',soft:'#3d3a36',muted:'#7a716a',line:'#d9cfbe',accent:'#2a3b2e',warm:'#b3753a',gold:'#c9a35b'};
+const SERIF='"Noto Serif KR",serif',SANS='Pretendard,"Apple SD Gothic Neo","Noto Sans KR",sans-serif';
+function wrapT(ctx,text,maxW){const out=[];let line='';for(const ch of String(text)){if(ctx.measureText(line+ch).width>maxW&&line){out.push(line);line=ch.trim()?ch:'';}else line+=ch;}if(line)out.push(line);return out;}
+function rr(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+function drawGoal(ctx,v,gi,y0){
+  const H=800;
+  ctx.fillStyle=C.paper;rr(ctx,48,y0,984,H-24,10);ctx.fill();ctx.strokeStyle=C.line;ctx.lineWidth=2;ctx.stroke();
+  ctx.font='italic 600 26px '+SERIF;ctx.fillStyle=C.warm;ctx.fillText('Goal 0'+(gi+1),88,y0+62);
+  ctx.font='600 46px '+SERIF;ctx.fillStyle=C.ink;let u=wrapT(ctx,v.univ||'대학 · 학과',880)[0];ctx.fillText(u,88,y0+122);
+  ctx.fillStyle=C.deep;rr(ctx,88,y0+148,904,60,30);ctx.fill();
+  ctx.font='600 26px '+SANS;ctx.fillStyle=C.accent;
+  const cv5=to5(v.cut);ctx.fillText('70% 컷  '+(v.cut?v.cut+' (9등급)'+(cv5?' ≈ 5등급 '+cv5.band+'등급대':''):'-')+'    최저  '+(v.min||'-'),116,y0+187);
+  const top=y0+236,bot=y0+740,cx=250,half=200,n=4,hT=(bot-top)/n;
+  const tiers=[['목표',C.gold,C.ink],['고3','#c48a4c','#fff'],['고1~2',C.warm,'#fff'],['지금',C.accent,C.paper]];
+  const rows=[v.univ||'-','내신 '+(v.now||'?')+' → '+(v.target||'?')+'등급 · 최저 '+(v.min||'?'),'수능 '+((v.area&&v.area.length)?v.area.join('+'):'?')+' · 생기부 '+(v.rec||'?'),v.todo||'-'];
+  tiers.forEach((t,i)=>{const yA=top+i*hT,yB=yA+hT-6,wa=half*i/n,wb=half*(i+1)/n,yc=yA+hT/2;
+    ctx.fillStyle=t[1];ctx.beginPath();ctx.moveTo(cx-wa,yA);ctx.lineTo(cx+wa,yA);ctx.lineTo(cx+wb,yB);ctx.lineTo(cx-wb,yB);ctx.closePath();ctx.fill();
+    ctx.font='600 '+(i?28:24)+'px '+SERIF;ctx.fillStyle=t[2];ctx.textAlign='center';ctx.fillText(t[0],cx,yA+hT*(i?0.6:0.8));ctx.textAlign='left';
+    ctx.strokeStyle=C.line;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(cx+half*(i+.5)/n+16,yc);ctx.lineTo(486,yc);ctx.stroke();
+    ctx.fillStyle=i===3?C.accent:C.warm;ctx.beginPath();ctx.arc(494,yc,6,0,7);ctx.fill();
+    ctx.font=(i===3?'700':'600')+' 29px '+SANS;const ls=wrapT(ctx,rows[i],470).slice(0,3),lh=38;let y=yc-(ls.length-1)*lh/2+10;
+    ls.forEach(l=>{ctx.fillStyle=i===3?C.accent:C.soft;ctx.fillText(l,516,y);y+=lh;});});
+}
+async function render(){
+  try{await Promise.all([document.fonts.load('600 46px "Noto Serif KR"','목표'),document.fonts.load('italic 600 26px "Noto Serif KR"','G'),document.fonts.load('600 29px Pretendard','가')]);}catch(e){}
+  const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+  ctx.fillStyle=C.bg;ctx.fillRect(0,0,1080,1920);
+  ctx.font='600 20px '+SANS;ctx.fillStyle=C.warm;ctx.fillText('TOP-DOWN 계획법 · 2028 고교학점제',52,74);
+  ctx.font='600 54px '+SERIF;ctx.fillStyle=C.ink;ctx.fillText('나의 진학 피라미드',48,144);
+  ctx.textAlign='right';ctx.font='600 30px '+SERIF;ctx.fillStyle=C.accent;ctx.fillText(S.name||'',1032,144);ctx.textAlign='left';
+  ctx.fillStyle=C.line;ctx.fillRect(48,172,984,2);
+  drawGoal(ctx,S.g[0],0,206);drawGoal(ctx,S.g[1],1,1010);
+  ctx.font='500 22px '+SANS;ctx.fillStyle=C.muted;ctx.fillText('목표에서 거꾸로 계획하기 — 결과를 예측해서 계획을 세워요',52,1880);
+  return cv;
+}
+let blob=null;
+document.getElementById('saveBtn').onclick=async()=>{
+  for(const i of [0,1]){const n=filled(S.g[i]);if(n<7){toast('목표 '+(i+1)+' 칸이 '+(7-n)+'개 남았어요');showTab(i);
+    const empty=[...document.querySelectorAll('.goal')[i].querySelectorAll('.q')].find((q,qi)=>{const v=S.g[i],k=Q[qi];return k.chips?!(v.area&&v.area.length):k.two?!(v.now&&v.target):!v[k.k];});
+    if(empty)setTimeout(()=>{empty.scrollIntoView({behavior:'smooth',block:'center'});empty.style.borderColor='var(--accent-warm)';},350);return;}}
+  const cv=await render();document.getElementById('preview').src=cv.toDataURL('image/png');
+  blob=null;cv.toBlob(b=>blob=b,'image/png');document.getElementById('modal').classList.add('on');
+};
+document.getElementById('closeBtn').onclick=()=>document.getElementById('modal').classList.remove('on');
+document.getElementById('dlBtn').onclick=async()=>{
+  const fname='진학계획_'+(S.name||'나').replace(/\s+/g,'')+'.png';
+  if(blob){const file=new File([blob],fname,{type:'image/png'});
+    if(navigator.canShare&&navigator.canShare({files:[file]})){try{await navigator.share({files:[file],title:'진학 계획'});return;}catch(e){if(e.name==='AbortError')return;}}}
+  const a=document.createElement('a');a.href=document.getElementById('preview').src;a.download=fname;document.body.appendChild(a);a.click();a.remove();
+};
+</script>
+</body>
+</html>
