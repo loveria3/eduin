@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f4ede2">
+<title>나의 창체 계획 만들기</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📝</text></svg>">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+:root{--bg:#f4ede2;--paper:#fbf6ec;--ink:#1b1a18;--soft:#3d3a36;--muted:#7a716a;--line:#d9cfbe;--accent:#2a3b2e;--blue:#0a74d6;--red:#d8380f;--head:#fff2cc}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{word-break:keep-all;font-family:Pretendard,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;background:var(--bg);color:var(--ink);font-size:16px;line-height:1.6;letter-spacing:-.01em;-webkit-font-smoothing:antialiased}
+.wrap{max-width:560px;margin:0 auto;padding:20px 16px 100px}
+header{padding:8px 0 18px}
+.kicker{font-size:13px;color:var(--muted);font-weight:600}
+h1{font-size:25px;line-height:1.3;margin-top:4px}
+h1 b{color:var(--blue)}
+.lead{color:var(--soft);font-size:15px;margin-top:6px}
+.q{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px}
+.q h2{font-size:17px;margin-bottom:10px;display:flex;gap:8px;align-items:center}
+.num{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--accent);color:#fff;font-size:13px;flex:none}
+.opt{font-size:12px;color:var(--muted);font-weight:500}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:9px 14px;font:inherit;font-size:15px;color:var(--ink);cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+.go{position:fixed;left:0;right:0;bottom:0;padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:linear-gradient(transparent,var(--bg) 30%)}
+.go button{display:block;width:100%;max-width:528px;margin:0 auto;border:0;border-radius:14px;padding:16px;font:inherit;font-size:18px;font-weight:800;background:var(--blue);color:#fff;cursor:pointer}
+.go button:disabled{background:#b9b2a8}
+#result{display:none}
+.card{background:#fff;border:1.5px solid #8a8a8a;border-radius:12px;overflow:hidden;margin-bottom:14px}
+.card .hd{background:var(--head);border-bottom:1.5px solid #8a8a8a;padding:10px 14px;font-weight:800;font-size:17px;display:flex;justify-content:space-between;align-items:center}
+.card .bd{padding:14px;color:var(--red);font-size:18px;font-weight:600;line-height:1.55;min-height:64px;word-break:keep-all}
+.card .tag{margin:0 14px 12px;display:inline-block;background:#e8f4ff;color:#0070c0;font-size:13px;font-weight:700;border-radius:8px;padding:3px 10px}
+.acts{display:flex;gap:6px}
+.mini{border:1px solid var(--line);background:#fff;border-radius:8px;padding:5px 9px;font:inherit;font-size:13px;font-weight:600;color:var(--soft);cursor:pointer}
+.tip{font-size:14px;color:var(--soft);background:var(--paper);border:1px dashed var(--line);border-radius:12px;padding:12px 14px;margin-bottom:14px}
+.row{display:flex;gap:8px;margin-top:6px}
+.row button{flex:1;border-radius:12px;padding:13px;font:inherit;font-weight:700;font-size:15px;cursor:pointer}
+.primary{background:var(--accent);color:#fff;border:0}
+.ghost{background:#fff;color:var(--ink);border:1.5px solid var(--line)}
+#imgbox{display:none;margin-top:14px;text-align:center}
+#imgbox img{width:100%;border-radius:10px;border:1px solid var(--line)}
+#imgbox p{font-size:13px;color:var(--muted);margin-top:6px}
+.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#222;color:#fff;padding:8px 16px;border-radius:999px;font-size:14px;opacity:0;transition:.2s;pointer-events:none}
+.toast.on{opacity:1}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <section id="form">
+    <header>
+      <div class="kicker">제주여상 1학년 · 교재 11p</div>
+      <h1>버튼 3번이면 끝!<br><b>나의 창체 계획</b> 만들기</h1>
+      <p class="lead">고르기만 하면 자율·동아리·진로 예시가 나와요.</p>
+    </header>
+    <div class="q"><h2><span class="num">1</span>우리 학과는?</h2><div class="chips" id="q-dept"></div></div>
+    <div class="q"><h2><span class="num">2</span>요즘 관심 있는 것은?</h2><div class="chips" id="q-int"></div></div>
+    <div class="q"><h2><span class="num">3</span>되고 싶은 직업은? <span class="opt">(몰라도 괜찮아요)</span></h2><div class="chips" id="q-job"><span class="opt">학과를 먼저 골라 주세요</span></div></div>
+  </section>
+
+  <section id="result">
+    <header>
+      <div class="kicker" id="r-sum"></div>
+      <h1>나의 <b>창체 계획</b> 예시</h1>
+      <p class="lead">마음에 안 들면 <b>다시</b>를 눌러요. 교재 11쪽에 옮겨 쓰세요.</p>
+    </header>
+    <div id="cards"></div>
+    <div class="tip">✏️ 옮겨 쓸 때 <b>내 말</b>로 조금 바꾸면 더 좋아요.<br>궁금한 점 → 할 활동 → 배운 점 순서로!</div>
+    <div class="row">
+      <button class="primary" id="btn-img">📷 이미지로 저장</button>
+      <button class="ghost" id="btn-back">↺ 처음부터</button>
+    </div>
+    <div id="imgbox"><img id="img" alt="나의 창체 계획 이미지"><p>저장이 안 되면 그림을 길게 눌러 ‘이미지 저장’</p></div>
+  </section>
+</div>
+<div class="go" id="go"><button id="btn-go" disabled>완성하기</button></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const DEPTS={
+ "회계금융과":["은행원","세무 공무원","회계 사무원","보험 설계사","세무사"],
+ "글로벌유통과":["마케터","상품기획자(MD)","무역 사무원","쇼핑몰 운영자","물류 관리자"],
+ "경영사무과":["행정 공무원","사무 행정원","인사 담당자","비서","호텔리어"]
+};
+const COMMON_JOBS=["간호사","회계사","은행원","증권사 직원","보험 설계사","창업가","아직 몰라요"];
+// a: 자율·자치(주제탐구) [과목, 문장] / c: 동아리 / r: 진로
+const BANK={
+ "감귤·제주 농산물":{a:[
+  ["상업 경제","상업 경제 시간에 배운 수요와 공급을 바탕으로, 제주 감귤 가격이 해마다 달라지는 이유를 탐구하고 싶다. 날씨와 출하량이 가격에 주는 영향을 조사해 보고서로 정리하겠다."],
+  ["정보 처리와 관리","최근 5년 동안 제주 감귤 생산량과 가격이 어떻게 변했는지 궁금하다. 정보 처리와 관리 시간에 배운 엑셀로 표와 그래프를 만들어 변화의 원인을 분석하겠다."],
+  ["통합사회","기후 변화로 감귤 재배 지역이 바뀌고 있다는 기사를 보고 궁금해졌다. 제주 농업이 받는 영향과 대응 방법을 조사해 발표 자료로 만들겠다."]],
+  c:["동아리에서 제주 농산물을 알리는 카드뉴스를 만들어 SNS에 올리고 싶다. 게시물별 반응을 비교해 어떤 홍보 방법이 효과적인지 정리하겠다.",
+  "친구들에게 감귤로 만들고 싶은 가공품 아이디어를 설문하고 싶다. 결과를 바탕으로 상품 이름과 가격을 정해 동아리 시간에 발표하겠다.",
+  "농가 일손 돕기 봉사에 참여해 감귤 수확 과정을 직접 경험하고 싶다. 농가의 어려움과 느낀 점을 기록해 동아리 친구들과 나누겠다."],
+  r:["농협 직원을 인터뷰해 감귤이 농가에서 소비자에게 가기까지의 유통 과정을 알아보고 싶다. 이 과정에 필요한 직업과 역량을 정리해 진로 발표를 하겠다."]},
+ "관광·호텔":{a:[
+  ["상업 경제","제주 관광객 수가 늘거나 줄면 지역 경제가 어떻게 달라지는지 궁금하다. 상업 경제에서 배운 내용을 바탕으로 관광 통계를 조사해 보고서로 정리하겠다."],
+  ["비즈니스 커뮤니케이션","비즈니스 커뮤니케이션 시간에 배운 고객 응대 예절이 호텔에서는 어떻게 쓰이는지 궁금하다. 상황별 응대 표현을 조사해 친구와 역할극으로 연습해 보겠다."],
+  ["통합사회","관광객이 너무 많아 생기는 오버투어리즘이 제주에도 있는지 궁금하다. 쓰레기와 교통 문제 사례를 조사하고 해결 방안을 제안하는 보고서를 쓰겠다."]],
+  c:["외국인 관광객을 위한 제주 관광지 안내 카드를 영어로 만들어 보고 싶다. 친구들과 역할을 나눠 제작하고 실제로 쓸 수 있는지 의견을 받겠다.",
+  "동아리에서 학교 주변 관광지를 묶은 1일 여행 코스를 기획하고 싶다. 예산과 이동 시간을 계산해 친구들 앞에서 발표하겠다.",
+  "지역 축제 안내 봉사에 참여해 관광객을 직접 응대해 보고 싶다. 친절한 응대에 필요한 점을 기록해 동아리에서 공유하겠다."],
+  r:["제주 호텔에서 일하는 직원을 인터뷰해 하루 업무와 필요한 역량을 알아보고 싶다. 내가 지금부터 준비할 것을 정리해 진로 발표를 하겠다."]},
+ "패션·뷰티":{a:[
+  ["상업 경제","패스트패션 옷이 어떻게 그렇게 싼 가격에 팔릴 수 있는지 궁금하다. 상업 경제에서 배운 생산 비용 개념으로 원인을 조사해 보고서로 정리하겠다."],
+  ["통합사회","버려지는 옷이 환경에 큰 문제가 된다는 것을 알고 궁금해졌다. 의류 쓰레기 실태와 업사이클링 기업 사례를 조사해 발표하겠다."],
+  ["정보 처리와 관리","10대가 화장품을 고를 때 무엇을 가장 중요하게 생각하는지 궁금하다. 친구들에게 설문하고 결과를 엑셀 그래프로 정리해 분석하겠다."]],
+  c:["안 입는 옷을 모아 교내 나눔 장터를 기획하고 운영하고 싶다. 모은 옷의 수와 참여 인원을 정리해 활동 결과를 보고하겠다.",
+  "동아리에서 우리 학교 굿즈를 디자인하고 판매 계획을 세워 보고 싶다. 원가와 판매 가격을 계산해 친구들에게 의견을 받겠다.",
+  "뷰티 브랜드들의 SNS 광고를 비교해 어떤 광고가 10대에게 인기 있는지 알아보고 싶다. 분석 결과를 카드뉴스로 만들어 발표하겠다."],
+  r:["패션·뷰티 회사의 상품기획자(MD)가 어떤 일을 하는지 조사하고 싶다. 필요한 역량과 관련 학과를 정리해 내 진로 계획에 반영하겠다."]},
+ "카페·음식":{a:[
+  ["회계 원리","카페 음료 한 잔의 가격이 어떻게 정해지는지 궁금하다. 회계 원리에서 배운 원가 개념으로 재료비와 인건비를 계산해 가격 구조를 분석하겠다."],
+  ["상업 경제","제주에 유독 카페가 많이 생기는 이유가 궁금하다. 관광객과 경쟁 구조를 상업 경제 내용과 연결해 조사하고 보고서로 정리하겠다."],
+  ["통합사회","일회용 컵을 줄이기 위한 제도가 실제로 효과가 있는지 궁금하다. 제주 사례를 조사하고 카페 사장님 의견을 들어 발표 자료를 만들겠다."]],
+  c:["학교 축제에서 먹거리 부스를 운영해 보고 싶다. 메뉴와 예산을 직접 짜고, 운영 후 매출과 비용을 정리해 발표하겠다.",
+  "제주 식재료를 활용한 새로운 메뉴 아이디어를 기획하고 싶다. 친구들에게 맛과 가격에 대한 의견을 받아 메뉴판으로 완성하겠다.",
+  "동네 가게의 메뉴판이나 홍보물을 만들어 드리는 재능 봉사를 하고 싶다. 사장님의 반응과 느낀 점을 기록해 동아리에서 공유하겠다."],
+  r:["카페 사장님을 인터뷰해 창업 비용과 운영의 어려움을 알아보고 싶다. 창업에 필요한 준비를 정리해 내 진로 계획과 연결하겠다."]},
+ "SNS·마케팅":{a:[
+  ["상업 경제","인플루언서 광고를 보고 물건을 사는 친구들이 많아 궁금해졌다. 광고가 10대의 소비에 주는 영향을 조사해 보고서로 정리하겠다."],
+  ["비즈니스 커뮤니케이션","짧은 광고 영상 중 끝까지 보게 되는 영상에는 어떤 특징이 있는지 궁금하다. 인기 광고 5개를 분석해 공통점을 정리하고 발표하겠다."],
+  ["정보 처리와 관리","우리 학교 친구들이 가장 많이 쓰는 SNS와 사용 시간이 궁금하다. 설문 결과를 엑셀 그래프로 정리해 마케팅에 활용할 방법을 찾아보겠다."]],
+  c:["동아리 활동을 소개하는 카드뉴스를 만들어 SNS 계정을 운영해 보고 싶다. 게시물별 반응을 비교해 효과적인 홍보 방법을 정리하겠다.",
+  "지역 가게의 홍보 영상을 만들어 드리는 마케팅 봉사를 하고 싶다. 기획부터 촬영, 편집까지 직접 하고 결과를 발표하겠다.",
+  "교내 행사 홍보 포스터를 두 가지로 만들어 어떤 것이 더 눈에 띄는지 조사하고 싶다. 친구들의 반응을 분석해 좋은 홍보물의 조건을 정리하겠다."],
+  r:["마케터가 하는 일과 필요한 역량을 조사하고 싶다. 우리 지역 상품을 위한 광고안을 직접 만들어 진로 발표 시간에 소개하겠다."]},
+ "금융·돈 관리":{a:[
+  ["상업 경제","뉴스에서 금리가 오른다는 말을 자주 듣는데 우리 생활에 어떤 영향이 있는지 궁금하다. 저축, 대출, 물가와의 관계를 조사해 보고서로 정리하겠다."],
+  ["회계 원리","내가 한 달 동안 용돈을 어디에 가장 많이 쓰는지 궁금하다. 회계 원리에서 배운 기록 방법으로 용돈기입장을 쓰고 소비 습관을 분석하겠다."],
+  ["통합사회","10대를 노리는 금융 사기가 늘고 있다는 기사를 보고 걱정이 되었다. 사기 유형과 예방 방법을 조사해 친구들이 볼 수 있는 자료로 만들겠다."]],
+  c:["친구들과 ‘한 달 용돈기입장 챌린지’를 기획하고 운영하고 싶다. 참여 전후의 소비 습관 변화를 비교해 결과를 발표하겠다.",
+  "동아리에서 금융 사기 예방 포스터를 만들어 교내에 붙이고 싶다. 친구들에게 꼭 필요한 내용을 설문해 포스터에 담겠다.",
+  "모의 주식 투자를 해 보며 주가가 움직이는 이유를 알아보고 싶다. 투자 기록과 배운 점을 정리해 동아리 시간에 발표하겠다."],
+  r:["도서 『부자 아빠 가난한 아빠』를 읽고 돈을 대하는 태도에 대해 생각해 보고 싶다. 인상 깊은 내용과 내 생활에 적용할 점을 정리해 발표하겠다.",
+  "은행원이 하는 일과 필요한 자격증을 조사하고 싶다. 은행원을 인터뷰해 알게 된 점을 진로 보고서로 정리하겠다."]},
+ "회계·세무":{a:[
+  ["회계 원리","회계 원리에서 배운 장부 작성이 실제 가게에서는 어떻게 쓰이는지 궁금하다. 작은 가게의 하루 거래를 가정해 장부를 작성하고 결과를 분석하겠다."],
+  ["상업 경제","물건을 살 때 내는 부가가치세가 어디에 쓰이는지 궁금하다. 세금의 종류와 쓰임을 조사해 친구들이 이해하기 쉬운 자료로 만들겠다."],
+  ["정보 처리와 관리","정보 처리와 관리에서 배운 엑셀 함수를 생활에 써 보고 싶다. 자동으로 합계가 계산되는 가계부 서식을 만들어 가족과 함께 사용해 보겠다."]],
+  c:["동아리 회비 사용 내역을 장부로 정리해 친구들에게 공개해 보고 싶다. 투명한 회계가 왜 중요한지 느낀 점을 기록하겠다.",
+  "회계 자격증 문제를 함께 풀고 서로 설명하는 스터디를 운영하고 싶다. 매주 푼 문제와 성장한 점을 기록으로 남기겠다.",
+  "학급 행사 예산을 직접 짜고 사용 결과를 정리해 보고 싶다. 계획과 실제 지출의 차이를 분석해 친구들 앞에서 발표하겠다."],
+  r:["도서 『회계는 어떻게 역사를 지배해왔는가』를 읽고 회계가 사회의 신뢰를 지키는 이유를 정리하고 싶다. 희망 직업과 연결해 진로 발표를 하겠다.",
+  "세무 공무원이 하는 일과 시험 과목을 조사하고 싶다. 지금 배우는 과목과 연결해 3년 준비 계획을 세워 보겠다."]},
+ "공무원·행정":{a:[
+  ["사무 관리","사무 관리 시간에 배운 문서 관리가 주민센터에서는 어떻게 이루어지는지 궁금하다. 민원 서류의 종류와 처리 과정을 조사해 보고서로 정리하겠다."],
+  ["통합사회","제주도 예산이 어디에 가장 많이 쓰이는지 궁금하다. 도청 자료를 찾아 분야별로 정리하고 내가 생각하는 개선점을 제안하겠다."],
+  ["정보 처리와 관리","정부24 같은 전자 민원 서비스가 얼마나 편리한지 궁금하다. 직접 사용해 보고 장단점과 개선 방안을 정리해 발표하겠다."]],
+  c:["학생자치회 회의에 참여해 회의록을 정리하고 건의 사항을 학교에 전달해 보고 싶다. 의견이 반영되는 과정을 기록하겠다.",
+  "우리 동네의 불편한 점을 친구들과 조사해 개선 제안서를 써 보고 싶다. 제안서를 주민센터에 제출하고 결과를 공유하겠다.",
+  "주민센터 행정 봉사에 참여해 공공 서비스를 직접 경험해 보고 싶다. 공무원이 하는 일과 느낀 점을 정리해 동아리에서 나누겠다."],
+  r:["고졸 공무원으로 일하는 선배를 인터뷰해 준비 과정과 하는 일을 알아보고 싶다. 내가 준비할 시험과 과목을 정리해 진로 계획을 세우겠다."]},
+ "온라인쇼핑·유통":{a:[
+  ["상업 경제","온라인 쇼핑이 늘어나면서 동네 가게가 어떤 변화를 겪는지 궁금하다. 가게 사장님 인터뷰와 자료 조사를 통해 보고서로 정리하겠다."],
+  ["통합사회","제주는 왜 택배비가 더 비싸고 배송이 늦은지 궁금하다. 섬 지역의 물류 구조를 조사해 원인과 해결 방법을 발표하겠다."],
+  ["정보 처리와 관리","쇼핑몰 리뷰와 별점이 구매 결정에 얼마나 영향을 주는지 궁금하다. 친구들에게 설문하고 결과를 그래프로 정리해 분석하겠다."]],
+  c:["동아리에서 작은 온라인 스토어 운영 계획을 세워 보고 싶다. 판매할 상품, 가격, 홍보 방법을 정해 친구들 앞에서 발표하겠다.",
+  "제주 특산품을 소개하는 쇼핑몰 상세페이지를 직접 만들어 보고 싶다. 친구들의 의견을 받아 더 잘 팔리는 페이지로 고쳐 보겠다.",
+  "교내 중고 물품 나눔 장터를 기획하고 운영하고 싶다. 물건이 모이고 나눠지는 과정을 유통의 흐름과 연결해 정리하겠다."],
+  r:["상품기획자(MD)가 어떤 기준으로 상품을 고르는지 궁금하다. 관련 직업 정보를 조사하고 내가 기획한 상품을 진로 발표에서 소개하겠다."]},
+ "AI·디지털":{a:[
+  ["인공지능 기초","AI가 회사의 사무 업무를 어떻게 바꾸고 있는지 궁금하다. 인공지능 기초에서 배운 내용을 바탕으로 실제 기업 사례를 조사해 보고서로 정리하겠다."],
+  ["사무 관리","AI가 회의록을 얼마나 잘 정리하는지 궁금하다. 같은 회의를 AI와 사람이 각각 정리해 보고 장단점을 비교해 발표하겠다."],
+  ["통합사회","AI가 만든 가짜 사진과 뉴스가 늘고 있어 걱정이 되었다. 가짜 정보를 구별하는 방법을 조사해 친구들을 위한 안내 자료를 만들겠다."]],
+  c:["AI 도구로 동아리 홍보물을 만들어 보고 싶다. 만드는 과정과 주의할 점을 정리해 친구들에게 사용법을 알려 주겠다.",
+  "어르신들께 키오스크와 스마트폰 사용법을 알려 드리는 봉사를 하고 싶다. 어려워하시는 부분을 기록해 쉬운 안내서를 만들겠다.",
+  "친구들과 생성형 AI를 바르게 쓰는 규칙을 정해 실천해 보고 싶다. 한 달 동안 지킨 결과와 느낀 점을 발표하겠다."],
+  r:["AI 시대에 사라지는 직업과 새로 생기는 직업이 무엇인지 궁금하다. 관련 자료를 조사해 내 희망 진로에 필요한 준비를 정리하겠다."]},
+ "환경·ESG":{a:[
+  ["상업 경제","기업이 비용이 더 드는데도 친환경 포장으로 바꾸는 이유가 궁금하다. 실제 기업 사례를 조사해 비용과 이익의 관계를 분석하겠다."],
+  ["통합사회","제주 바다에 밀려오는 해양 쓰레기 문제가 심각하다는 것을 알게 되었다. 원인과 기업의 ESG 활동 사례를 조사해 보고서로 정리하겠다."],
+  ["정보 처리와 관리","우리 반이 일주일 동안 쓰는 일회용품이 얼마나 될지 궁금하다. 사용량을 기록해 그래프로 정리하고 줄이는 방법을 제안하겠다."]],
+  c:["해변 정화 봉사에 참여해 어떤 쓰레기가 가장 많은지 알아보고 싶다. 모은 쓰레기를 종류별로 정리해 동아리에서 발표하겠다.",
+  "교내 텀블러 사용 캠페인을 기획하고 운영하고 싶다. 캠페인 전후의 일회용 컵 사용량을 비교해 결과를 정리하겠다.",
+  "친환경 제품을 소개하는 카드뉴스를 만들어 SNS에 알리고 싶다. 친구들의 반응을 모아 다음 캠페인에 반영하겠다."],
+  r:["ESG 경영을 잘하는 기업이 어떤 일을 하는지 궁금하다. 기업 사례와 관련 직업을 조사해 내 진로와 연결해 발표하겠다."]},
+ "창업":{a:[
+  ["상업 경제","청소년 창업으로 성공한 사례가 있는지 궁금하다. 성공한 사례를 찾아 공통된 성공 이유를 분석하고 보고서로 정리하겠다."],
+  ["회계 원리","작은 가게를 열면 한 달에 얼마를 벌고 써야 하는지 궁금하다. 회계 원리에서 배운 내용으로 수입과 비용을 계산해 보겠다."],
+  ["비즈니스 커뮤니케이션","투자자를 설득하는 사업 발표에는 어떤 특징이 있는지 궁금하다. 발표 영상을 분석해 공통점을 정리하고 직접 짧게 발표해 보겠다."]],
+  c:["동아리에서 학교의 불편한 점을 해결하는 창업 아이디어를 기획해 보고 싶다. 친구들의 의견을 모아 사업 계획서로 완성해 발표하겠다.",
+  "학교 축제에서 부스를 운영해 보고 싶다. 준비 과정부터 매출과 비용까지 정리해 운영 결과를 발표하겠다.",
+  "제주 특산품을 활용한 상품 아이디어를 만들어 보고 싶다. 친구들에게 평가를 받아 상품 이름과 가격을 정해 보겠다."],
+  r:["제주에서 창업한 청년 창업가를 인터뷰해 창업 과정과 어려움을 알아보고 싶다. 창업에 필요한 역량을 정리해 진로 계획에 반영하겠다."]}
+};
+function josa(w,a,b){const s=w.replace(/\(.*?\)/g,"").trim();const c=s.charCodeAt(s.length-1);if(c<0xAC00||c>0xD7A3)return w+b;return w+((c-0xAC00)%28?a:b);}
+const JOB_EXTRA={
+ "간호사":["간호학과에 가려면 어떤 준비가 필요한지 궁금하다. 제주대 간호학과의 전형과 수능 최저 기준을 조사해 3년 준비 계획을 세우겠다.",
+  "병원에서 간호사 말고도 원무과 직원이 어떤 일을 하는지 궁금하다. 사무 관리 수업과 연결해 병원 행정 업무를 조사하고 정리하겠다.",
+  "간호사를 직접 인터뷰해 하루 업무와 필요한 자질을 알아보고 싶다. 인터뷰 내용을 정리해 진로 발표를 하겠다."],
+ "회계사":["회계사가 되려면 어떤 시험과 과정을 거쳐야 하는지 궁금하다. 시험 과목과 준비 방법을 조사해 지금 배우는 과목과 연결해 정리하겠다.",
+  "회계사가 기업의 장부를 검토하는 이유가 궁금하다. 회계 원리에서 배운 내용과 연결해 회계 감사의 역할을 정리하고 발표하겠다."],
+ "증권사 직원":["주식이 어떻게 사고팔리는지, 그 과정에서 증권사가 무슨 일을 하는지 궁금하다. 조사한 내용을 그림으로 정리해 진로 발표를 하겠다.",
+  "모의 투자를 해 보며 주가가 움직이는 이유를 알아보고 싶다. 투자 기록을 바탕으로 증권사 직원에게 필요한 역량을 정리하겠다."],
+ "보험 설계사":["사람들이 왜 보험에 가입하는지 궁금하다. 보험의 종류와 보험 설계사가 하는 일을 조사해 보고서로 정리하겠다.",
+  "10대에게도 필요한 보험 상식이 있는지 궁금하다. 조사한 내용을 카드뉴스로 만들어 친구들에게 알리겠다."],
+ "은행원":["은행 창구에서 어떤 업무를 하는지 궁금하다. 은행을 방문해 업무를 살펴보고 필요한 자격증을 조사해 진로 계획을 세우겠다."]
+};
+function jobLines(job,dept){if(job==="간호사")return JOB_EXTRA[job].slice();return (JOB_EXTRA[job]||[]).concat([
+ josa(job,"이","가")+" 하는 일과 필요한 자격증이 궁금하다. 직업 정보를 조사해 내가 지금부터 준비할 일을 정리하고 진로 발표를 하겠다.",
+ josa(job,"을","를")+" 직접 만나 인터뷰해 실제 업무와 보람을 알아보고 싶다. 인터뷰 내용을 정리해 내 진로 계획에 반영하겠다.",
+ dept+"에서 배우는 과목이 "+job+" 일에 어떻게 쓰이는지 궁금하다. 관련 과목과 필요한 역량을 연결해 정리하고 발표하겠다."
+]);}
+const S={dept:null,int:null,job:null,idx:{a:0,c:0,r:0},lists:{}};
+const $=id=>document.getElementById(id);
+function chips(el,items,key,onPick){el.innerHTML="";items.forEach(t=>{const b=document.createElement("button");b.className="chip";b.textContent=t;b.setAttribute("aria-pressed",S[key]===t);b.onclick=()=>{S[key]=t;[...el.children].forEach(x=>x.setAttribute("aria-pressed",x===b));onPick&&onPick();check();};el.appendChild(b);});}
+function check(){$("btn-go").disabled=!(S.dept&&S.int);}
+chips($("q-dept"),Object.keys(DEPTS),"dept",()=>{S.job=null;chips($("q-job"),[...new Set(DEPTS[S.dept].concat(COMMON_JOBS))],"job");});
+chips($("q-int"),Object.keys(BANK),"int");
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function build(){
+ const B=BANK[S.int];const job=(S.job&&S.job!=="아직 몰라요")?S.job:null;
+ S.lists.a=shuffle(B.a).map(x=>({t:x[1],tag:"연결: "+x[0]+" · 주제탐구"}));
+ S.lists.c=shuffle(B.c).map(t=>({t,tag:"연결: "+S.int+" · 동아리"}));
+ let r=B.r.map(t=>({t,tag:"연결: 진로 탐색"}));
+ if(job){r=shuffle(jobLines(job,S.dept)).map(t=>({t,tag:"연결: 희망 직업 "+job})).slice(0,3).concat(r);
+   r=[r[0]].concat(shuffle(r.slice(1)));}
+ else r=shuffle(r.concat([{t:S.int+" 분야와 관련된 학과에서는 무엇을 배우는지 궁금하다. 관련 학과 2곳을 찾아 배우는 과목과 진출 직업을 비교해 정리하겠다.",tag:"연결: 진로 탐색"}]));
+ S.lists.r=r;S.idx={a:0,c:0,r:0};
+}
+const HEADS={a:"자율·자치활동 (주제탐구)",c:"동아리활동",r:"진로활동"};
+function cur(k){const l=S.lists[k];return l[S.idx[k]%l.length];}
+function render(){
+ $("r-sum").textContent=S.dept+" · "+S.int+(S.job&&S.job!=="아직 몰라요"?" · "+S.job:"");
+ $("cards").innerHTML="";
+ ["a","c","r"].forEach(k=>{const it=cur(k);const d=document.createElement("div");d.className="card";
+  d.innerHTML=`<div class="hd"><span>${HEADS[k]}</span><span class="acts"><button class="mini" data-re="${k}">🔄 다시</button><button class="mini" data-cp="${k}">복사</button></span></div><div class="bd">${it.t}</div><span class="tag">${it.tag}</span>`;
+  $("cards").appendChild(d);});
+ $("imgbox").style.display="none";
+}
+$("cards").addEventListener("click",e=>{const re=e.target.dataset.re,cp=e.target.dataset.cp;
+ if(re){S.idx[re]++;render();}
+ if(cp){copy(cur(cp).t);}});
+function toast(m){const t=$("toast");t.textContent=m;t.classList.add("on");setTimeout(()=>t.classList.remove("on"),1400);}
+function copy(t){(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>toast("복사했어요")).catch(()=>{const ta=document.createElement("textarea");ta.value=t;document.body.appendChild(ta);ta.select();try{document.execCommand("copy");toast("복사했어요");}catch(e){toast("길게 눌러 복사해 주세요");}ta.remove();});}
+$("btn-go").onclick=()=>{build();render();$("form").style.display="none";$("go").style.display="none";$("result").style.display="block";scrollTo(0,0);};
+$("btn-back").onclick=()=>{$("result").style.display="none";$("form").style.display="block";$("go").style.display="block";scrollTo(0,0);};
+function wrap(ctx,text,maxW){const out=[];let line="";for(const w of text.split(" ")){const t=line?line+" "+w:w;if(ctx.measureText(t).width>maxW&&line){out.push(line);line=w;}else line=t;}if(line)out.push(line);return out;}
+$("btn-img").onclick=async()=>{
+ try{await document.fonts.ready;}catch(e){}
+ const W=1080,P=56,F='Pretendard,"Apple SD Gothic Neo","Noto Sans KR",sans-serif';
+ const cv=document.createElement("canvas");const ctx=cv.getContext("2d");
+ ctx.font="600 40px "+F;
+ const blocks=["a","c","r"].map(k=>({h:HEADS[k],it:cur(k),lines:wrap(ctx,cur(k).t,W-2*P-60)}));
+ let H=250;blocks.forEach(b=>H+=90+b.lines.length*60+100+30);H+=60;
+ cv.width=W;cv.height=H;
+ ctx.fillStyle="#f4ede2";ctx.fillRect(0,0,W,H);
+ ctx.fillStyle="#7a716a";ctx.font="600 30px "+F;ctx.fillText("제주여상 1학년 · "+$("r-sum").textContent,P,90);
+ ctx.fillStyle="#1b1a18";ctx.font="800 58px "+F;ctx.fillText("나의 창체 계획",P,170);
+ let y=230;
+ blocks.forEach(b=>{const bh=90+b.lines.length*60+100;
+  ctx.fillStyle="#fff";ctx.fillRect(P,y,W-2*P,bh);
+  ctx.fillStyle="#fff2cc";ctx.fillRect(P,y,W-2*P,80);
+  ctx.strokeStyle="#8a8a8a";ctx.lineWidth=3;ctx.strokeRect(P,y,W-2*P,bh);ctx.beginPath();ctx.moveTo(P,y+80);ctx.lineTo(W-P,y+80);ctx.stroke();
+  ctx.fillStyle="#333";ctx.font="800 38px "+F;ctx.fillText(b.h,P+30,y+54);
+  ctx.fillStyle="#d8380f";ctx.font="600 40px "+F;
+  b.lines.forEach((l,i)=>ctx.fillText(l,P+30,y+80+58+i*60));
+  const ty=y+80+b.lines.length*60+30;ctx.font="700 28px "+F;const tw=ctx.measureText(b.it.tag).width+36;
+  ctx.fillStyle="#e8f4ff";ctx.fillRect(P+30,ty,tw,48);ctx.fillStyle="#0070c0";ctx.fillText(b.it.tag,P+48,ty+34);
+  y+=bh+30;});
+ const url=cv.toDataURL("image/png");$("img").src=url;$("imgbox").style.display="block";
+ const a=document.createElement("a");a.href=url;a.download="나의_창체계획.png";document.body.appendChild(a);a.click();a.remove();
+ $("imgbox").scrollIntoView({behavior:"smooth"});
+};
+</script>
+</body>
+</html>
