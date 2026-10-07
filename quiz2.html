@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>2교시 확인 퀴즈</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+:root{--bg:#eaf4ff;--card:#fff;--ink:#1d2433;--muted:#6b7280;--blue:#0a84ff;--ok:#16a34a;--no:#e5484d;--line:#d6e4f5}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:Pretendard,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;word-break:keep-all}
+.wrap{max-width:760px;margin:0 auto;padding:24px 16px 40px}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.tag{background:var(--blue);color:#fff;font-weight:800;border-radius:999px;padding:6px 14px;font-size:15px}
+.prog{font-weight:700;color:var(--muted)}
+.bar{height:8px;background:#d3e5fb;border-radius:99px;overflow:hidden;margin-bottom:18px}
+.bar i{display:block;height:100%;background:var(--blue);width:0;transition:.3s}
+.card{background:var(--card);border-radius:22px;padding:26px 22px;box-shadow:0 6px 24px rgba(10,60,120,.08)}
+.qn{color:var(--blue);font-weight:900;font-size:18px;margin-bottom:6px;display:flex;gap:8px;align-items:center}
+.lv{font-size:13px;font-weight:800;border-radius:999px;padding:3px 10px;background:#e7f6ec;color:#15803d}.lv.mid{background:#fff4dc;color:#a16207}.lv.hard{background:#ffe4e6;color:#be123c}
+.q{font-size:clamp(22px,4.2vw,30px);font-weight:800;line-height:1.4;margin-bottom:20px}
+.opts{display:grid;gap:10px}
+.opt{display:flex;gap:12px;align-items:center;text-align:left;width:100%;border:2px solid var(--line);background:#fff;border-radius:14px;padding:14px 16px;font:inherit;font-size:clamp(18px,3.4vw,22px);font-weight:700;color:var(--ink);cursor:pointer}
+.opt b{display:inline-grid;place-items:center;flex:none;width:34px;height:34px;border-radius:50%;background:#eef4fb;color:var(--blue)}
+.ox{grid-template-columns:1fr 1fr}
+.ox .opt{justify-content:center;font-size:48px;padding:22px}
+.opt.ok{border-color:var(--ok);background:#eafaf0}
+.opt.no{border-color:var(--no);background:#fff0f0}
+.opt:disabled{cursor:default}
+.fb{display:none;margin-top:18px;border-radius:14px;padding:14px 16px;font-size:clamp(17px,3vw,20px);line-height:1.5}
+.fb.show{display:block}
+.fb.ok{background:#eafaf0;color:#14532d}.fb.no{background:#fff0f0;color:#7f1d1d}
+.fb strong{display:block;font-size:1.1em;margin-bottom:4px}
+.next{display:none;margin-top:16px;width:100%;border:0;border-radius:14px;padding:16px;font:inherit;font-size:20px;font-weight:800;background:var(--blue);color:#fff;cursor:pointer}
+.next.show{display:block}
+.end{text-align:center}
+.end .big{font-size:64px;font-weight:900;color:var(--blue);margin:10px 0}
+.end p{font-size:20px;color:var(--muted);margin-bottom:18px}
+.review{text-align:left;display:grid;gap:8px;margin:18px 0}
+.review div{background:#f5f9ff;border-radius:12px;padding:10px 14px;font-size:17px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><span class="tag">2교시 확인 퀴즈</span><span class="prog" id="prog"></span></div>
+  <div class="bar"><i id="bar"></i></div>
+  <div class="card" id="card"></div>
+</div>
+<script>
+const Q=[
+ {q:"고등학교 3년 동안 이수하는 총 학점은?",o:["174학점","180학점","192학점","204학점"],a:2,e:"교과 174학점 + 창의적 체험활동 18학점 = 192학점이에요."},
+ {q:"고3 때 먼저 지원하는 모집은?",o:["수시","정시"],a:0,ox:true,e:"수시는 고3 때 먼저 지원하고, 정시는 수능 성적이 나온 뒤에 지원해요."},
+ {q:"2028 대입에서 수시 모집 비율은 약 몇 %일까?",o:["약 20%","약 50%","약 80%","100%"],a:2,e:"수시 80.8%, 정시 19.2%예요. 대부분 수시로 뽑아요."},
+ {q:"내신이 아무리 좋아도 수능 최저를 못 맞추면 불합격이다.",o:["O","X"],a:0,ox:true,e:"수능 최저는 '자격 조건'이에요. 못 맞추면 내신과 상관없이 불합격!"},
+ {q:"학생부 내신 성적에 가장 큰 비중을 두고 뽑는 전형은?",o:["학생부교과전형","학생부종합전형","논술전형","실기전형"],a:0,e:"학생부교과전형은 내신 비중이 50% 이상이에요. 우리가 주로 가는 전형!"},
+ {q:"수시에서 학생 한 명이 지원할 수 있는 최대 횟수는?",o:["3회","4회","6회","제한 없음"],a:2,e:"수시는 최대 6회까지 지원할 수 있어요."},
+ {q:"정시에서 학생 한 명이 지원할 수 있는 최대 횟수는?",o:["1회","3회","6회","제한 없음"],a:1,e:"정시는 가군·나군·다군에 한 번씩, 최대 3회예요."},
+ {q:"우리 학교에서 배우는 과목 중 수능 '직업탐구' 과목은?",o:["상업 경제","회계 원리","성공적인 직업생활","통합사회"],a:2,e:"성공적인 직업생활(3학년 1학기)이 수능 직업탐구 과목이에요."},
+ {q:"보통교과의 '선택과목'에 속하지 않는 것은?",o:["일반선택","진로선택","융합선택","공통과목"],a:3,e:"공통과목은 모두가 배우는 기초 과목이에요. 선택과목은 일반·진로·융합선택!"},
+ {q:"수시·정시가 '지원 시기'라면, 교과·종합·논술은 무엇일까?",o:["선발 방법","지원 시기","대학 이름","학과 이름"],a:0,e:"교과·종합·논술은 학생을 뽑는 '선발 방법'이에요."},
+ {q:"수능 최저를 맞추면 합격이 보장된다.",o:["O","X"],a:1,ox:true,e:"최저는 '최소 조건'일 뿐! 최저를 통과한 학생끼리 다시 내신으로 경쟁해요."},
+ {q:"학생부종합전형의 평가 역량이 아닌 것은?",o:["학업 역량","진로 역량","공동체 역량","수능 역량"],a:3,e:"학생부종합은 학업 역량·진로 역량·공동체 역량을 종합적으로 봐요."},
+ {q:"제주대 인문대·사회대·경상대 교과전형의 수능 최저는?",o:["2개 영역 등급 합 9","2개 영역 등급 합 10","3개 영역 등급 합 11","수능 최저 없음"],a:0,e:"국·수·영·탐 중 2개 영역 등급 합이 9 이내여야 해요."},
+ {q:"수능 탐구에서 통합사회·통합과학을 고르면 몇 과목을 응시할까?",o:["1과목(둘 중 하나)","2과목(둘 다)","3과목","응시하지 않음"],a:1,e:"통합사회·통합과학은 두 과목 모두 응시해야 해요."},
+ {q:"2028 수능 국어 범위가 아닌 과목은?",o:["화법과 언어","독서와 작문","문학","주제 탐구 독서"],a:3,e:"2028 수능 국어는 화법과 언어 · 독서와 작문 · 문학이에요."},
+ {q:"화법과 언어 · 미적분Ⅰ은 우리 학교에서 언제 배울 수 있을까?",o:["1학년 공통과목","2학년 1학기","2학년 2학기","3학년 학점제 선택"],a:3,e:"3학년 학점제 선택(택1)에서만 배워요. 목표 대학에 맞춰 전략적으로 고르기!"},
+ {q:"수능 탐구로 직업탐구를 고르기 전에 꼭 확인할 것은?",o:["친구들이 많이 고르는지","목표 대학이 직업탐구를 반영하는지","시험 시간이 짧은지","교과서가 얇은지"],a:1,e:"직업탐구를 반영하지 않는 대학도 많아요. 목표 대학 모집요강에서 꼭 확인!"},
+ {q:"제주대 간호학과 최저는 '3개 영역 등급 합 11'. 통과하는 성적은?",o:["3 · 4 · 5등급","2 · 4 · 5등급","4 · 4 · 4등급","3 · 5 · 5등급"],a:1,hard:true,e:"2+4+5 = 11이라 통과! 나머지는 12, 12, 13이라 아쉽게 불합격이에요."},
+ {q:"7명 모집에 177명 지원(25:1). 최저 통과자는 약 99명, 추가합격까지 10명 합격. 실제 경쟁률은?",o:["약 25 : 1","약 18 : 1","약 10 : 1","약 5 : 1"],a:2,hard:true,e:"최저를 통과한 약 99명 ÷ 합격 10명 ≈ 10 : 1. 최저만 맞춰도 경쟁률이 확 줄어요!"},
+ {q:"제주대 특성화고졸업자 전형(학생부종합)의 지원 자격으로 맞는 것은?",o:["어느 학과 출신이든 지원 가능","관련 전문교과 24학점 이상 이수","수능 3개 영역 등급 합 9","내신 1등급만 지원 가능"],a:1,hard:true,e:"기준학과와 같은 학과이거나 관련 전문교과를 24학점 이상 들어야 해요. 서류 100% · 수능 최저 없음!"}
+];
+let i=0,score=0,log=[];
+const card=document.getElementById('card');
+function render(){
+  document.getElementById('prog').textContent=(i+1)+" / "+Q.length;
+  document.getElementById('bar').style.width=(i/Q.length*100)+"%";
+  const it=Q[i];
+  const lv=it.hard?'<span class="lv hard">도전!</span>':(i<8?'<span class="lv">쉬움</span>':'<span class="lv mid">보통</span>');
+  card.innerHTML=`<div class="qn">Q${i+1} ${lv}</div><div class="q">${it.q}</div>
+   <div class="opts ${it.ox?'ox':''}">${it.o.map((t,k)=>`<button class="opt" data-k="${k}">${it.ox?'':'<b>'+(k+1)+'</b>'}${t}</button>`).join('')}</div>
+   <div class="fb" id="fb"></div><button class="next" id="next">${i<Q.length-1?'다음 문제 →':'결과 보기'}</button>`;
+  card.querySelectorAll('.opt').forEach(b=>b.onclick=()=>pick(+b.dataset.k));
+  document.getElementById('next').onclick=()=>{i++; i<Q.length?render():end();};
+}
+function pick(k){
+  const it=Q[i],ok=k===it.a; if(ok)score++; log.push(ok);
+  card.querySelectorAll('.opt').forEach((b,n)=>{b.disabled=true; if(n===it.a)b.classList.add('ok'); else if(n===k)b.classList.add('no');});
+  const fb=document.getElementById('fb'); fb.className='fb show '+(ok?'ok':'no');
+  fb.innerHTML=`<strong>${ok?'⭕ 정답!':'❌ 아쉬워요 · 정답은 '+(it.ox?it.o[it.a]:(it.a+1)+'번')}</strong>${it.e}`;
+  document.getElementById('next').classList.add('show');
+}
+function end(){
+  document.getElementById('prog').textContent="완료";
+  document.getElementById('bar').style.width="100%";
+  const msg=score===Q.length?"완벽해요! 🎉":score>=14?"잘했어요! 👍":"한 번 더 보면 다 맞힐 수 있어요 💪";
+  card.innerHTML=`<div class="end"><div class="qn">결과</div><div class="big">${score} / ${Q.length}</div><p>${msg}</p>
+   <div class="review">${Q.map((it,n)=>`<div>${log[n]?'⭕':'❌'} Q${n+1}. ${it.e}</div>`).join('')}</div>
+   <button class="next show" id="again">다시 풀기</button></div>`;
+  document.getElementById('again').onclick=()=>{i=0;score=0;log=[];render();};
+}
+render();
+</script>
+</body>
+</html>
