@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>지도 맞추기 (선생님용)</title>
+<script src="../config.js"></script>
+<script src="../heritage.js"></script>
+<style>
+:root{--ink:#2b3a55;}
+*{box-sizing:border-box;}
+body{margin:0; font-family:"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",sans-serif; color:var(--ink); background:#eef4f9;}
+#wrap{display:grid; grid-template-columns:340px 1fr; gap:12px; padding:12px; min-height:100vh;}
+#side{background:#fff; border-radius:16px; padding:14px; display:flex; flex-direction:column; gap:10px; box-shadow:0 3px 12px rgba(0,0,0,.08);}
+h1{font-size:20px; margin:0;}
+.box{border:2px solid #e3eaf2; border-radius:12px; padding:10px;}
+.box b{display:block; margin-bottom:6px;}
+.mode{display:flex; flex-direction:column; gap:4px;}
+.mode label{font-weight:700; cursor:pointer; padding:4px 6px; border-radius:8px;}
+.mode input:checked + span{color:#fff; background:#ff8c1a; border-radius:6px; padding:0 6px;}
+input[type=number]{width:60px; font:inherit; padding:2px 4px;}
+select, button, textarea{font:inherit;}
+button{border:0; border-radius:10px; background:#4c97ff; color:#fff; font-weight:800; padding:8px 10px; cursor:pointer;}
+#lmList{max-height:180px; overflow:auto; font-size:13px;}
+#lmList div{padding:2px 6px; border-radius:6px; cursor:pointer;}
+#lmList div.on{background:#ffe8cc;} #lmList div.done::after{content:" ✓"; color:#12bd8c; font-weight:900;}
+textarea{width:100%; height:180px; font-size:12px; font-family:Consolas,monospace;}
+#stageWrap{background:#fff; border-radius:16px; padding:10px; overflow:auto; box-shadow:0 3px 12px rgba(0,0,0,.08);}
+#stage{position:relative; display:inline-block; cursor:crosshair; user-select:none;}
+#stage img{display:block; max-width:none;}
+#ov{position:absolute; inset:0; width:100%; height:100%;}
+.help{font-size:13px; color:#5b6b83; line-height:1.5;}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <div id="side">
+    <h1>🗺️ 지도 맞추기 (선생님용)</h1>
+    <p class="help">새 지도 그림을 쓸 때 한 번만 하면 돼요. 끝나면 아래 글을 복사해 <b>config.js</b>의 같은 이름 줄과 바꿔요.</p>
+    <div class="box"><b>0. 지도 그림</b><input type="file" id="file" accept="image/*"><div class="help">그림 파일은 jeju 폴더에 넣고, 이름을 아래 결과의 BG_IMAGE에 적어요.</div></div>
+    <div class="box"><b>1. 칸 수 (한 칸 = 10cm)</b>가로 <input type="number" id="cols" min="2" max="20"> × 세로 <input type="number" id="rows" min="2" max="20"></div>
+    <div class="box mode"><b>2. 지도 위를 눌러서 정하기</b>
+      <label><input type="radio" name="m" value="grid" checked> <span>① 격자 모서리 (왼쪽 위 → 오른쪽 아래 두 번)</span></label>
+      <label><input type="radio" name="m" value="cell"> <span>② 칸 누르기: 땅 → 바다 → 산(못 감)</span></label>
+      <label><input type="radio" name="m" value="start"> <span>③ 출발 칸 (공항)</span></label>
+      <label><input type="radio" name="m" value="lm"> <span>④ 기준점 (아래 목록에서 고르고 그 장소를 누르기)</span></label>
+      <div id="lmList"></div>
+      <div class="help">기준점은 지도 곳곳에 <b>6곳 이상</b> 찍으면 좋아요. 점을 잘못 찍었으면 다시 누르면 옮겨져요.</div>
+    </div>
+    <label><input type="checkbox" id="showSpots" checked> 헤리티지 100곳 미리 보기</label>
+    <div class="box"><b>3. config.js에 붙여 넣을 글</b><textarea id="out" readonly></textarea><button id="copy">📋 복사</button></div>
+  </div>
+  <div id="stageWrap"><div id="stage"><img id="img"><svg id="ov"></svg></div></div>
+</div>
+<script>
+const $ = id => document.getElementById(id);
+const S = {
+  bg: BG_IMAGE, w: IMG_SIZE.w, h: IMG_SIZE.h,
+  cols: GRID_COLS, rows: GRID_ROWS, grid: { ...GRID },
+  map: MAP.map(r => r.split('')), start: { ...START },
+  pts: MAP_POINTS.map(p => ({ ...p })), cornerClick: 0, lm: 0,
+};
+// 기준점 후보: 지금 기준점 + 자주 쓰는 랜드마크
+const EXTRA = [['한라산 백록담',33.362,126.533],['서귀포 시내',33.246,126.560],['표선해수욕장',33.326,126.840],['한림항',33.413,126.262],['김녕해수욕장',33.557,126.758]];
+EXTRA.forEach(([n, la, ln]) => { if (!S.pts.find(p => p.name === n)) S.pts.push({ name:n, lat:la, lng:ln }); });
+
+function makeProjector(points){        // common.js 와 같은 계산
+  const P = points.filter(p => p.x != null); if (P.length < 3) return null;
+  function fit(key){ const M=[[0,0,0],[0,0,0],[0,0,0]], v=[0,0,0];
+    P.forEach(p=>{ const r=[p.lat,p.lng,1]; for(let i=0;i<3;i++){ v[i]+=r[i]*p[key]; for(let j=0;j<3;j++) M[i][j]+=r[i]*r[j]; } });
+    for(let i=0;i<3;i++){ let m=i; for(let k=i+1;k<3;k++) if(Math.abs(M[k][i])>Math.abs(M[m][i])) m=k; [M[i],M[m]]=[M[m],M[i]]; [v[i],v[m]]=[v[m],v[i]];
+      for(let k=0;k<3;k++) if(k!==i){ const f=M[k][i]/M[i][i]; for(let j=i;j<3;j++) M[k][j]-=f*M[i][j]; v[k]-=f*v[i]; } }
+    return v.map((x,i)=>x/M[i][i]); }
+  const cx=fit('x'), cy=fit('y'), aff=(la,ln)=>[cx[0]*la+cx[1]*ln+cx[2], cy[0]*la+cy[1]*ln+cy[2]];
+  const res=P.map(p=>{const a=aff(p.lat,p.lng); return [p.x-a[0], p.y-a[1]];});
+  return (la,ln)=>{ let sw=0,sx=0,sy=0; for(let i=0;i<P.length;i++){ const d2=((la-P[i].lat)*111)**2+((ln-P[i].lng)*93)**2;
+    if(d2<1e-6){const a=aff(la,ln); return [a[0]+res[i][0], a[1]+res[i][1]];} sw+=1/d2; sx+=res[i][0]/d2; sy+=res[i][1]/d2; }
+    const a=aff(la,ln); return [a[0]+sx/sw, a[1]+sy/sw]; };
+}
+function resizeMap(){
+  const m = []; for (let r = 0; r < S.rows; r++){ m.push([]); for (let c = 0; c < S.cols; c++) m[r].push((S.map[r] || [])[c] || 'o'); }
+  S.map = m;
+}
+const cw = () => S.grid.width / S.cols, ch = () => S.grid.height / S.rows;
+function cellAt(x, y){ return { r: Math.floor((y - S.grid.top) / ch()), c: Math.floor((x - S.grid.left) / cw()) }; }
+
+function draw(){
+  const ov = $('ov'); ov.setAttribute('viewBox', `0 0 ${S.w} ${S.h}`);
+  let h = '';
+  for (let r = 0; r < S.rows; r++) for (let c = 0; c < S.cols; c++){
+    const t = S.map[r][c], x = S.grid.left + c * cw(), y = S.grid.top + r * ch();
+    if (t !== 'o') h += `<rect x="${x}" y="${y}" width="${cw()}" height="${ch()}" fill="${t === '~' ? 'rgba(0,90,200,.35)' : 'rgba(120,70,20,.45)'}"/>`;
+    if (r + 1 === S.start.row && c + 1 === S.start.col) h += `<rect x="${x+4}" y="${y+4}" width="${cw()-8}" height="${ch()-8}" fill="none" stroke="#4c97ff" stroke-width="6"/><text x="${x+cw()/2}" y="${y+ch()/2}" font-size="${ch()*.22}" text-anchor="middle" fill="#1d5fc7" font-weight="900">✈ 출발</text>`;
+  }
+  for (let c = 0; c <= S.cols; c++){ const x = S.grid.left + c * cw(); h += `<line x1="${x}" y1="${S.grid.top}" x2="${x}" y2="${S.grid.top + S.grid.height}" stroke="red" stroke-width="2"/>`; }
+  for (let r = 0; r <= S.rows; r++){ const y = S.grid.top + r * ch(); h += `<line x1="${S.grid.left}" y1="${y}" x2="${S.grid.left + S.grid.width}" y2="${y}" stroke="red" stroke-width="2"/>`; }
+  const proj = makeProjector(S.pts);
+  if (proj && $('showSpots').checked) HERITAGE.forEach(s => { const [x, y] = proj(s.lat, s.lng); h += `<circle cx="${x}" cy="${y}" r="6" fill="#ff3d7f" stroke="#fff" stroke-width="2"><title>${s.name}</title></circle>`; });
+  S.pts.forEach((p, i) => { if (p.x == null) return;
+    h += `<circle cx="${p.x}" cy="${p.y}" r="10" fill="${i === S.lm ? '#ff8c1a' : '#12bd8c'}" stroke="#fff" stroke-width="3"/><text x="${p.x + 12}" y="${p.y - 10}" font-size="18" font-weight="900" fill="#0b6e50" stroke="#fff" stroke-width="4" paint-order="stroke">${p.name}</text>`; });
+  ov.innerHTML = h;
+  $('lmList').innerHTML = S.pts.map((p, i) => `<div data-i="${i}" class="${i === S.lm ? 'on' : ''} ${p.x != null ? 'done' : ''}">${p.name}</div>`).join('');
+  $('lmList').querySelectorAll('div').forEach(d => d.onclick = () => { S.lm = +d.dataset.i; document.querySelector('[value=lm]').checked = true; draw(); });
+  output();
+}
+function output(){
+  const r1 = v => Math.round(v * 10) / 10;
+  const pts = S.pts.filter(p => p.x != null).map(p => `  { name:'${p.name}', lat:${p.lat}, lng:${p.lng}, x:${Math.round(p.x)}, y:${Math.round(p.y)} },`).join('\n');
+  $('out').value =
+`var BG_IMAGE = '${S.bg}';
+var IMG_SIZE = { w: ${S.w}, h: ${S.h} };
+var GRID = { left: ${r1(S.grid.left)}, top: ${r1(S.grid.top)}, width: ${r1(S.grid.width)}, height: ${r1(S.grid.height)} };
+var GRID_COLS = ${S.cols};
+var GRID_ROWS = ${S.rows};
+var EVEN_GRID = true;
+var MAP = [
+${S.map.map(r => `  '${r.join('')}',`).join('\n')}
+];
+var START = { row: ${S.start.row}, col: ${S.start.col}, dir: 1, name: '${S.start.name || '제주국제공항'}' };
+var MAP_POINTS = [
+${pts}
+];`;
+}
+$('stage').onclick = e => {
+  const img = $('img'), rect = img.getBoundingClientRect();
+  const x = (e.clientX - rect.left) * S.w / rect.width, y = (e.clientY - rect.top) * S.h / rect.height;
+  const m = document.querySelector('[name=m]:checked').value;
+  if (m === 'grid'){
+    if (S.cornerClick === 0){ S.c0 = [x, y]; S.cornerClick = 1; return; }
+    S.grid = { left:Math.min(S.c0[0], x), top:Math.min(S.c0[1], y), width:Math.abs(x - S.c0[0]), height:Math.abs(y - S.c0[1]) }; S.cornerClick = 0;
+  }
+  const { r, c } = cellAt(x, y), inside = r >= 0 && r < S.rows && c >= 0 && c < S.cols;
+  if (m === 'cell' && inside) S.map[r][c] = { 'o':'~', '~':'M', 'M':'o' }[S.map[r][c]];
+  if (m === 'start' && inside){ S.start.row = r + 1; S.start.col = c + 1; }
+  if (m === 'lm'){ S.pts[S.lm].x = x; S.pts[S.lm].y = y; S.lm = Math.min(S.lm + 1, S.pts.length - 1); }
+  draw();
+};
+$('cols').value = S.cols; $('rows').value = S.rows;
+$('cols').oninput = $('rows').oninput = () => { S.cols = +$('cols').value || 2; S.rows = +$('rows').value || 2; resizeMap(); draw(); };
+$('showSpots').onchange = draw;
+$('copy').onclick = () => { $('out').select(); navigator.clipboard && navigator.clipboard.writeText($('out').value); $('copy').textContent = '✓ 복사했어요'; };
+$('file').onchange = () => {
+  const f = $('file').files[0]; if (!f) return;
+  S.bg = f.name; S.pts.forEach(p => { delete p.x; delete p.y; }); S.lm = 0;
+  $('img').onload = () => { S.w = $('img').naturalWidth; S.h = $('img').naturalHeight; S.grid = { left:0, top:0, width:S.w, height:S.h };
+    $('img').style.width = Math.min(S.w, innerWidth - 400) + 'px'; draw(); };
+  $('img').src = URL.createObjectURL(f);
+};
+$('img').onload = () => { $('img').style.width = Math.min(S.w, innerWidth - 400) + 'px'; draw(); };
+$('img').src = '../' + BG_IMAGE;
+</script>
+</body>
+</html>
