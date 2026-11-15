@@ -89,41 +89,12 @@ const Sound = (() => {
     click(){ tone(1500, 0, .045, 'square', .05); tone(700, .035, .07, 'triangle', .12); },
     ding(f = 1319){ tone(f, 0, .55, 'sine', .3); tone(f * 2, 0, .3, 'sine', .08); },
     warn(){ tone(330, 0, .13, 'square', .12, 300); tone(220, .15, .22, 'square', .12, 180); },
+    // 성공: 짧고 부드러운 '띠링~' (약 0.6초, 작은 소리)
     win(){
-      if (!on || !ctx) return;
-      const G4 = 392, C5 = 523, D5 = 587, E5 = 659, G5 = 784, C6 = 1047;
-      // 작은북 롤 → 따-따-따-따안! → 따라라-따아안!
-      for (let t = 0; t < .42; t += .035) noise(t, .03, .05 + t * .25, 2500);
-      brass([G4], 0, .11); brass([G4], .14, .11); brass([G4], .28, .11);
-      brass([C5, E5, G4], .42, .5); timpani(.42, 98); noise(.42, .9, .35, 7000);
-      brass([E5], .98, .13); brass([D5], 1.13, .13); brass([E5], 1.28, .13);
-      brass([G5, C5, E5, C6 / 2], 1.44, 1.3); timpani(1.44, 65); timpani(1.62, 98); noise(1.44, 1.4, .4, 7000);
-      [C6, 1319, 1568, 2093, 2637].forEach((f, i) => tone(f, 1.7 + i * .07, .5, 'sine', .07));
+      [1047, 1319, 1568].forEach((f, i) => tone(f, i * .08, .45, 'sine', .09));
+      tone(2093, .16, .4, 'sine', .03);
     }
   };
-  // 금관(트럼펫) 느낌: 톱니파 2개를 살짝 어긋나게 + 필터가 열리는 소리
-  function brass(freqs, start, dur){
-    const t = ctx.currentTime + start, out = ctx.createGain(), lp = ctx.createBiquadFilter();
-    lp.type = 'lowpass'; lp.Q.value = 2;
-    lp.frequency.setValueAtTime(500, t); lp.frequency.exponentialRampToValueAtTime(3800, t + .06);
-    lp.frequency.exponentialRampToValueAtTime(1800, t + dur);
-    out.gain.setValueAtTime(0.0001, t); out.gain.exponentialRampToValueAtTime(.16, t + .03);
-    out.gain.setValueAtTime(.13, t + dur * .7); out.gain.exponentialRampToValueAtTime(0.0001, t + dur + .15);
-    lp.connect(out).connect(ctx.destination);
-    freqs.forEach(f => [-6, 6].forEach(cents => {
-      const o = ctx.createOscillator(); o.type = 'sawtooth'; o.frequency.value = f; o.detune.value = cents;
-      o.connect(lp); o.start(t); o.stop(t + dur + .2);
-    }));
-  }
-  function noise(start, dur, vol, hp){
-    const t = ctx.currentTime + start, n = ctx.sampleRate * dur, buf = ctx.createBuffer(1, n, ctx.sampleRate), d = buf.getChannelData(0);
-    for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
-    const src = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain();
-    src.buffer = buf; f.type = 'highpass'; f.frequency.value = hp;
-    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-    src.connect(f).connect(g).connect(ctx.destination); src.start(t);
-  }
-  function timpani(start, f){ tone(f * 1.6, start, .7, 'sine', .45, f); }
 })();
 
 /* ---------- 폭죽 ---------- */
@@ -231,7 +202,7 @@ function toLand(x, y){                       // 바다·한라산 칸에 떨어�
   return [Math.min(Math.max(x, x0 + m), x1 - m), Math.min(Math.max(y, y0 + m), y1 - m)];
 }
 HERITAGE.forEach(s => {
-  if (Project && s.lat != null){ let [x, y] = Project(s.lat, s.lng); if (!s.island) [x, y] = toLand(x, y); s.x = Math.round(x); s.y = Math.round(y); }
+  if (Project && s.lat != null && !window.USE_HERITAGE_XY){ let [x, y] = Project(s.lat, s.lng); if (!s.island) [x, y] = toLand(x, y); s.x = Math.round(x); s.y = Math.round(y); }
   Object.assign(s, cellOf(s.x, s.y));
 });
 const SPOT = Object.fromEntries(HERITAGE.map(s => [s.id, s]));
@@ -439,10 +410,9 @@ function decodeRecord(str){ try { return String(str).startsWith('H|') ? JSON.par
    핑퐁 스크래치(.sb3) 만들기 — 웹 핑퐁 스크래치 '컴퓨터에서 불러오기'로 열기
    ===================================================================== */
 const SB3 = (() => {
-  const S = 360 / IMG.h, CELLPX = GRID.width / COLS * S;
-  const X0 = -IMG.w * S / 2 + GRID.left * S, Y0 = 180 - GRID.top * S;
+  const S = Math.min(480 / IMG.w, 360 / IMG.h), CELLPX = GRID.width / COLS * S;   // 무대(480×360)에 꼭 맞게
+  const X0 = -IMG.w * S / 2 + GRID.left * S, Y0 = IMG.h * S / 2 - GRID.top * S;
   const startXY = [Math.round(X0 + (START.col - .5) * CELLPX), Math.round(Y0 - (START.row - .5) * CELLPX)];
-  const steps = cm => Math.round(cm / 10 * CELLPX);
 
   function project(prog, title){
     const blocks = {}; let n = 0;
@@ -461,20 +431,17 @@ const SB3 = (() => {
       return ids[0];
     }
     const carMove = (cm, dir) => ['PingPongAutoCar_moveRobot', i => ({ DIRECTION: menu('PingPongAutoCar_menu_MOVE_LENGTH_DIRECTION_MENU', 'MOVE_LENGTH_DIRECTION_MENU', dir > 0 ? '1' : '-1', i), INTERVAL: txt(cm) })];
-    const scrMove = (cm, dir) => ['motion_movesteps', () => ({ STEPS: num(dir * steps(cm)) })];
+    // 학생이 만든 코드 그대로: 오토카 블록만 (화면 그림은 출발 칸에 놓아 두기만 함)
     const items = [
       ['event_whenflagclicked'],
       ['text2speech_setLanguage', i => ({ LANGUAGE: menu('text2speech_menu_languages', 'languages', 'ko', i) })],
-      ['motion_gotoxy', () => ({ X: num(startXY[0]), Y: num(startXY[1]) })],
-      ['motion_pointindirection', () => ({ DIRECTION: [1, [8, '90']] })],
     ];
     function build(list){
       const out = [];
       list.forEach(b => {
-        if (b.t === 'move') out.push(carMove(b.cm, b.dir), scrMove(b.cm, b.dir));
+        if (b.t === 'move') out.push(carMove(b.cm, b.dir));
         if (b.t === 'turn') out.push(
-          ['PingPongAutoCar_rotateRobot', i => ({ DIRECTION: menu('PingPongAutoCar_menu_MOVE_WIDTH_DIRECTION_MENU', 'MOVE_WIDTH_DIRECTION_MENU', b.dir === 'L' ? '0' : '1', i), DEGREE: txt(b.deg) })],
-          [b.dir === 'L' ? 'motion_turnleft' : 'motion_turnright', () => ({ DEGREES: num(b.deg) })]);
+          ['PingPongAutoCar_rotateRobot', i => ({ DIRECTION: menu('PingPongAutoCar_menu_MOVE_WIDTH_DIRECTION_MENU', 'MOVE_WIDTH_DIRECTION_MENU', b.dir === 'L' ? '0' : '1', i), DEGREE: txt(b.deg) })]);
         if (b.t === 'tts') out.push(['text2speech_speakAndWait', () => ({ WORDS: txt(b.text) })]);
         if (b.t === 'say') out.push(['looks_sayforsecs', () => ({ MESSAGE: txt(b.text), SECS: num(2) })]);
         if (b.t === 'wait') out.push(['control_wait', () => ({ DURATION: [1, [5, String(b.sec)]] })]);
@@ -511,21 +478,33 @@ const SB3 = (() => {
   async function md5hex(u8){        // 파일 이름용 고유값 (SHA-1 앞 32자리 — 스크래치는 이름만 맞으면 됨)
     const h = await crypto.subtle.digest('SHA-1', u8); return [...new Uint8Array(h)].map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 32);
   }
+  /* 무대 배경: 보통은 화면의 지도 그림을 그대로 쓰고,
+     파일로 바로 열어(file://) 브라우저가 막으면 backdrop.js 에 담아 둔 배경을 씀 */
   async function backdrop(img){
-    const cv = document.createElement('canvas'); cv.width = 960; cv.height = 720;
-    const g = cv.getContext('2d'); g.fillStyle = '#d6eef8'; g.fillRect(0, 0, 960, 720);
-    const w = Math.round(IMG.w * 720 / IMG.h); g.drawImage(img, (960 - w) / 2, 0, w, 720);
-    const blob = await new Promise(r => cv.toBlob(r, 'image/png'));
-    return new Uint8Array(await blob.arrayBuffer());
+    try {
+      const cv = document.createElement('canvas'); cv.width = 960; cv.height = 720;
+      const g = cv.getContext('2d'); g.fillStyle = '#d6eef8'; g.fillRect(0, 0, 960, 720);
+      const w = Math.round(IMG.w * S * 2), h = Math.round(IMG.h * S * 2); g.drawImage(img, (960 - w) / 2, (720 - h) / 2, w, h);
+      const blob = await new Promise((res, rej) => { try { cv.toBlob(b => b ? res(b) : rej(new Error('blob')), 'image/png'); } catch(e){ rej(e); } });
+      return { bytes:new Uint8Array(await blob.arrayBuffer()), fmt:'png' };
+    } catch(e){
+      if (!window.BACKDROP_JPG) await new Promise((res, rej) => {
+        const s = document.createElement('script'); s.src = 'backdrop.js'; s.onload = res; s.onerror = () => rej(new Error('backdrop.js 파일이 없어요'));
+        document.head.appendChild(s);
+      });
+      const bin = atob(window.BACKDROP_JPG), u8 = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+      return { bytes:u8, fmt:'jpg' };
+    }
   }
   async function build(prog, title, img){
-    const bg = await backdrop(img);
+    const { bytes:bg, fmt } = await backdrop(img);
     const carSvg = new TextEncoder().encode('<svg xmlns="http://www.w3.org/2000/svg" width="74" height="74" viewBox="-50 -50 100 100"><g transform="rotate(90)">' +
       CAR_SVG.replace(/^<svg[^>]*>/, '').replace(/<\/svg>\s*$/, '') + '</g></svg>');
     const bgId = await md5hex(bg), carId = await md5hex(carSvg);
     const pj = { targets:[
       { isStage:true, name:'Stage', variables:{}, lists:{}, broadcasts:{}, blocks:{}, comments:{}, currentCostume:0,
-        costumes:[{ name:'제주 지도', bitmapResolution:2, dataFormat:'png', assetId:bgId, md5ext:bgId + '.png', rotationCenterX:480, rotationCenterY:360 }],
+        costumes:[{ name:'제주 지도', bitmapResolution:2, dataFormat:fmt, assetId:bgId, md5ext:bgId + '.' + fmt, rotationCenterX:480, rotationCenterY:360 }],
         sounds:[], volume:100, layerOrder:0, tempo:60, videoTransparency:50, videoState:'on', textToSpeechLanguage:'ko' },
       { isStage:false, name:'오토카', variables:{}, lists:{}, broadcasts:{}, blocks:project(prog, title), comments:{}, currentCostume:0,
         costumes:[{ name:'오토카', bitmapResolution:1, dataFormat:'svg', assetId:carId, md5ext:carId + '.svg', rotationCenterX:37, rotationCenterY:37 }],
@@ -533,7 +512,7 @@ const SB3 = (() => {
     ], monitors:[], extensions:['PingPongAutoCar', 'text2speech'], meta:{ semver:'3.0.0', vm:'0.2.0', agent:'jeju-heritage-planner' } };
     return zip([
       { name:'project.json', data:new TextEncoder().encode(JSON.stringify(pj)) },
-      { name:bgId + '.png', data:bg },
+      { name:bgId + '.' + fmt, data:bg },
       { name:carId + '.svg', data:carSvg },
     ]);
   }
@@ -567,4 +546,102 @@ function bumpCar(sign, ms){
     { transform:'translateY(0) rotate(-9deg)', offset:.45 }, { transform:'rotate(9deg)', offset:.6 },
     { transform:'rotate(-6deg)', offset:.75 }, { transform:'none' }
   ], { duration: ms + 100, easing:'ease-out' });
+}
+
+/* =====================================================================
+   여행 계획서 — 학생 코스 카드 · 선생님 발표 화면 · 이미지 저장에 함께 씀
+   rec = { no, th, s:[장소 id], st:[스탬프], p:코드, cn, tg, ln, se, why, tip, sc }
+   거리·시간은 지도 한 칸 ≈ 7km, 자율주행 택시 평균 40km/h 로 어림한 '예상' 값
+   ===================================================================== */
+const KM_PER_CELL = window.KM_PER_CELL || 7, TAXI_KMH = 40;
+const THEME_DESC = { H:'옛 제주 사람들의 삶과 역사를 따라 걷는 시간 여행',
+  V:'화산이 만든 오름·동굴·바위를 만나는 자연 탐험', S:'바다와 함께 살아온 해녀와 바닷가 마을 이야기',
+  M:'신들과 전설이 깃든 곳을 찾아 떠나는 신화 여행', A:'예술과 쉼이 있는 곳에서 몸과 마음을 쉬는 힐링 여행' };
+const STAY_MIN = { '자연':80, '문화':60, '무형':60, '연계':60 };
+const hhmm = m => `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
+const round5 = v => Math.max(10, Math.round(v / 5) * 5);
+function legOf(a, b){
+  let d = dist(a, b); if (d >= 99) d = Math.abs(a.row - b.row) + Math.abs(a.col - b.col);
+  const km = Math.max(3, Math.round(d * KM_PER_CELL)); return { cells:d, km, min:round5(km / TAXI_KMH * 60) };
+}
+function guideLine(prog, s){ let t = ''; walk(prog || [], b => { if (!t && (b.t === 'tts' || b.t === 'say') && saysName(b.text, s)) t = b.text; }); return t; }
+function makePlan(rec){
+  const spots = (rec.s || []).map(id => SPOT[id]).filter(Boolean), items = [];
+  let t = 9 * 60, prev = START, km = 0, drive = 0, lunch = false;
+  items.push({ k:'start', time:t, title:`${START.name || '제주국제공항'} 출발`, sub:'자율주행 택시 탑승 · 안전벨트 착용!' });
+  spots.forEach((s, i) => {
+    const g = legOf(prev, s); t += g.min; km += g.km; drive += g.min;
+    items.push({ k:'move', min:g.min, km:g.km });
+    const stay = STAY_MIN[s.cat] || 60;
+    items.push({ k:'spot', n:i + 1, time:t, s, stay, ok:(rec.st || []).includes(s.id), say:guideLine(rec.p, s) });
+    t += stay; prev = s;
+    if (!lunch && (t >= 12 * 60 || i === 1) && i < spots.length - 1){
+      lunch = true; items.push({ k:'lunch', time:t, title:'점심 · 쉬는 시간', sub:`${s.area || '근처'}에서 제주 향토 음식(고기국수·몸국·보말국) 맛보기` }); t += 60;
+    }
+  });
+  if (spots.length){ const g = legOf(prev, START); t += g.min; km += g.km; drive += g.min;
+    items.push({ k:'move', min:g.min, km:g.km }); items.push({ k:'end', time:t, title:`${START.name || '제주국제공항'} 도착`, sub:'오늘 여행 끝! 소감 나누기' }); }
+  let reps = 0; walk(rec.p || [], b => { if (b.t === 'rep') reps++; });
+  return { spots, items, km, drive, end:t, blocks:countBlocks(rec.p || []), reps };
+}
+/* 작은 지도: 칸(땅/바다/한라산) + 방문 순서 */
+function miniMapSVG(spots){
+  const W = COLS * 10, H = ROWS * 10, cells = [];
+  for (let r = 1; r <= ROWS; r++) for (let c = 1; c <= COLS; c++){
+    const t = cellType(r, c); if (t === 'sea') continue;
+    cells.push(`<rect x="${(c - 1) * 10 + .4}" y="${(r - 1) * 10 + .4}" width="9.2" height="9.2" rx="1.6" fill="${t === 'mount' ? '#9fc79a' : '#cfe8c4'}"/>`);
+  }
+  const P = s => [(s.x - GRID.left) / GRID.width * W, (s.y - GRID.top) / GRID.height * H].map(v => +v.toFixed(1));
+  const st = [(START.col - .5) * 10, (START.row - .5) * 10], pts = [st, ...spots.map(P)];
+  return `<svg class="miniMap" viewBox="-2 -2 ${W + 4} ${H + 4}" xmlns="http://www.w3.org/2000/svg">
+    <rect x="-2" y="-2" width="${W + 4}" height="${H + 4}" rx="4" fill="#dff1fb"/>${cells.join('')}
+    <polyline points="${pts.map(p => p.join(',')).join(' ')} ${st.join(',')}" fill="none" stroke="#ff3d7f" stroke-width="1.3" stroke-dasharray="2.6 1.8" stroke-linejoin="round"/>
+    <text x="${st[0]}" y="${st[1] + 2.4}" font-size="7" text-anchor="middle">✈️</text>
+    ${spots.map((s, i) => { const [x, y] = P(s); return `<circle cx="${x}" cy="${y}" r="3.6" fill="#ff6f00" stroke="#fff" stroke-width=".9"/><text x="${x}" y="${y + 1.7}" font-size="4.6" font-weight="900" fill="#fff" text-anchor="middle">${i + 1}</text>`; }).join('')}
+  </svg>`;
+}
+function planSheetHTML(rec){
+  const t = THEMES[rec.th] || { name:'', icon:'', color:'#1C7557' }, P = makePlan(rec);
+  const tl = P.items.map(it => {
+    if (it.k === 'move') return `<div class="pv pvMove"><span></span><span>🚕</span><span>자율주행 택시로 약 <b>${it.min}분</b> 이동 (약 ${it.km}km)</span></div>`;
+    if (it.k === 'spot'){ const s = it.s;
+      return `<div class="pv pvSpot${it.ok ? ' ok' : ''}"><span class="tm">${hhmm(it.time)}</span><span class="no">${it.ok ? '🏅' : it.n}</span>
+        <div><b>${esc(s.name)}</b> <i>${esc(CAT_NAME[s.cat] || s.cat)} · ${esc(s.area || '')} · ${it.stay}분 머물기</i>
+        <p>${esc(s.intro)}</p><p>🔎 <b>탐험 미션</b> ${esc(s.mission)}</p>
+        ${it.say ? `<p class="say">🗣 가이드 안내: “${esc(it.say)}”</p>` : ''}</div></div>`; }
+    return `<div class="pv pv_${it.k}"><span class="tm">${hhmm(it.time)}</span><span class="no">${it.k === 'lunch' ? '🍽' : it.k === 'start' ? '🛫' : '🛬'}</span><div><b>${esc(it.title)}</b> <i>${esc(it.sub)}</i></div></div>`;
+  }).join('');
+  const box = (h, v, ph) => `<div class="pbox"><h4>${h}</h4><p>${v ? esc(v) : `<span class="pph">${ph}</span>`}</p></div>`;
+  return `<div class="planSheet" style="--tc:${t.color}">
+    <div class="ptop"><span>🚕 자율주행으로 떠나는 제주 헤리티지 여행 계획서</span><span>${rec.no ? rec.no + '번 여행 플래너' : ''}</span></div>
+    <h1>📜 ${esc(rec.cn || t.name + ' 코스')}</h1>
+    <div class="ptags"><span class="th">${t.icon} ${esc(t.name)}</span><span>👥 ${esc(rec.tg || '누구나')}</span>${rec.se ? `<span>🗓 ${esc(rec.se)}</span>` : ''}<span>⏰ 당일치기 ${hhmm(540)}~${hhmm(P.end)}</span>${rec.sc != null ? `<span class="sc">⭐ ${rec.sc}점</span>` : ''}</div>
+    <div class="pline">💬 ${rec.ln ? esc(rec.ln) : esc(THEME_DESC[rec.th] || '')}</div>
+    <div class="pgrid">
+      <div class="ptl">${tl}</div>
+      <div class="pside">${miniMapSVG(P.spots)}
+        <div class="stats"><div><b>${P.spots.length}곳</b>방문</div><div><b>${P.km}km</b>이동</div><div><b>${P.drive}분</b>자율주행</div>
+          <div><b>${(rec.st || []).length}/${P.spots.length}</b>스탬프</div><div><b>${P.blocks}개</b>코드 블록</div><div><b>${P.reps}개</b>반복 블록</div></div>
+        ${box('💡 이 코스를 추천하는 이유', rec.why, '추천 이유를 적어요')}
+        ${box('🎒 준비물 · 여행 팁', rec.tip, '준비물이나 팁을 적어요')}
+      </div>
+    </div>
+    <div class="pfoot">관광 코스를 설계하는 여행 플래너 · 자율주행으로 떠나는 우리 지역 관광 코스 기획하기 <span>※ 거리·시간은 지도 한 칸 ≈ ${KM_PER_CELL}km로 어림한 값</span></div>
+  </div>`;
+}
+/* 계획서를 PNG 이미지로 저장 (패들렛에 올리기) — html2canvas 를 필요할 때 불러옴 */
+async function savePlanImage(rec, fileName){
+  if (!window.html2canvas) await new Promise((res, rej) => {
+    const s = document.createElement('script'); s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+    s.onload = res; s.onerror = () => rej(new Error('인터넷 연결을 확인해요')); document.head.appendChild(s);
+  });
+  const host = document.createElement('div');
+  host.style.cssText = 'position:fixed; left:-10000px; top:0; width:960px; background:#fff;';
+  host.innerHTML = planSheetHTML(rec); document.body.appendChild(host);
+  try {
+    const cv = await html2canvas(host.firstElementChild, { scale:2, backgroundColor:'#ffffff', logging:false });
+    const blob = await new Promise(r => cv.toBlob(r, 'image/png'));
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = fileName + '.png';
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  } finally { host.remove(); }
 }

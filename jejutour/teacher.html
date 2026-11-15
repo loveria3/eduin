@@ -4,10 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>선생님 화면 - 제주 헤리티지 택시</title>
-<script src="config.js?v=20261111g"></script>
-<script src="heritage.js?v=20261111g"></script>
-<link rel="stylesheet" href="common.css?v=20261111g">
-<link rel="stylesheet" href="planner.css?v=20261111g">
+<script src="config.js?v=20261115e"></script>
+<script src="heritage.js?v=20261115e"></script>
+<link rel="stylesheet" href="common.css?v=20261115e">
+<link rel="stylesheet" href="planner.css?v=20261115e">
 <style>
 #nums{flex:1; min-height:0; display:grid; grid-template-columns:repeat(5, 1fr); grid-auto-rows:minmax(0,1fr); gap:6px; padding:8px; background:#f9fafc;}
 .num-card{border:0; border-radius:12px; background:#fff; font:inherit; font-weight:900; cursor:pointer; padding:2px; min-width:0; min-height:0;
@@ -28,23 +28,20 @@
 #bPlay{background:#12bd8c;} #bReset{background:#ff8c1a;} #bShow{background:#4c97ff;} #bSound{background:#9966ff; flex:.5 !important;}
 #trail{position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:3;}
 #trail polyline{fill:none; stroke:#ff3d7f; stroke-width:6; stroke-linecap:round; stroke-linejoin:round; stroke-dasharray:12 9;}
-#show .card{width:min(94vw, 900px); text-align:left; font-size:clamp(16px, min(2vw, 3vh), 30px);}
-#show .card h1{color:#2b3a55; font-size:1.7em; margin:.1em 0;}
-#show .spots{display:grid; grid-template-columns:repeat(3, 1fr); gap:.6em; margin:.6em 0;}
-#show .sp{background:#f6f9fc; border-radius:14px; padding:.6em; box-shadow:0 0 0 2px #e6edf4 inset;}
-#show .sp b{display:block;} #show .sp small{color:#5b6b83; font-weight:700; font-size:.7em; line-height:1.35; display:block;}
-#show .sp.ok{box-shadow:0 0 0 3px #12bd8c inset;}
-#show .meta{display:flex; gap:1em; flex-wrap:wrap; font-weight:900; color:#5b6b83;}
-#show .meta b{color:#ff6f00;}
+#show .planSheet{font-size:clamp(14px, min(1.5vw, 2.3vh), 22px);}
+#show .card{width:min(97vw, 1300px) !important;}
 #resetBox .card{text-align:center;}
+#left h2{display:flex; align-items:center; gap:.4em;}
+.initBtn{margin-left:auto; border:0; border-radius:1em; padding:.25em .8em; background:#ffe1dc; color:#d23c28; font:inherit; font-weight:900; font-size:.75em; cursor:pointer; flex:none;}
+.initBtn:active{transform:scale(.94); background:#ffcfc7;}
 </style>
 </head>
 <body data-step="3">
 <div id="app">
   <section class="panel" id="left">
-    <h2>👩‍🏫 우리 반 <span class="demoTag" id="demoTag"></span></h2>
+    <h2>👩‍🏫 우리 반 <span class="demoTag" id="demoTag"></span><button id="bInit" class="initBtn" title="화면과 기록을 처음 상태로">↺ 초기화</button></h2>
     <div id="nums"></div>
-    <div class="legend">번호를 누르면 코스를 다시 달려요 · 흐린 번호는 아직 안 보냈어요<br><span id="status"></span> <button class="mini" id="bClear" hidden>🗑 기록 지우기</button></div>
+    <div class="legend">번호를 누르면 여행 계획서가 나와요 · 흐린 번호는 아직 안 보냈어요<br><span id="status"></span></div>
   </section>
 
   <div id="boardWrap">
@@ -62,13 +59,13 @@
   </section>
 </div>
 
-<div id="show" class="overlay"><div class="card" id="showCard"></div></div>
-<div id="resetBox" class="overlay"><div class="card"><h1>🗑 기록을 모두 지울까요?</h1><p>보낸 기록이 모두 지워지고 되돌릴 수 없어요.</p>
+<div id="show" class="overlay planPop"><div class="card" id="showCard"></div></div>
+<div id="resetBox" class="overlay"><div class="card"><h1>↺ 초기화할까요?</h1><p id="resetTxt">학생들이 보낸 기록이 모두 지워지고 되돌릴 수 없어요.</p>
   <div id="resetMsg"></div><button class="primary" id="resetGo" style="background:#e0533d">지우기</button> <button class="ghost" id="resetNo">취소</button></div></div>
 <div id="toast"></div>
 <canvas id="confetti"></canvas>
 
-<script src="common.js?v=20261111g"></script>
+<script src="common.js?v=20261115e"></script>
 <script>
 const board = $('board'), layer = $('layer');
 function updateCellVar(){ board.style.setProperty('--cell', board.clientWidth * cellSize() / 100 + 'px'); }
@@ -88,7 +85,8 @@ function demoData(){
     if (k % 3 === 1) p.unshift({ t:'turn', dir:'L', deg:90 }, { t:'turn', dir:'R', deg:90 });
     const st = k % 4 === 3 ? s.slice(0, 2) : s.slice();
     const sc = calcScore(p, st.length, 0).total;
-    DATA[no] = { no, th, s, cn:THEMES[th].name + ' 코스', tg:['가족','친구','외국인 관광객'][k % 3], ln:'제주의 ' + THEMES[th].name + '을(를) 한 번에!', p, st, sc };
+    DATA[no] = { no, th, s, cn:THEMES[th].name + ' 코스', tg:['가족','친구','외국인 관광객'][k % 3], ln:'제주의 ' + THEMES[th].name + '을(를) 한 번에!', p, st, sc,
+      se:['봄','여름','가을','겨울'][k % 4], why:k % 2 ? '' : '하루 만에 ' + THEMES[th].name + ' 명소 세 곳을 알차게 둘러볼 수 있어요.', tip:k % 3 ? '편한 운동화와 물을 챙겨요' : '' };
   });
 }
 
@@ -161,6 +159,7 @@ function select(no){
   ['bPlay', 'bReset', 'bShow'].forEach(id => $(id).disabled = false);
   resetRun(); drawPins([]);
   $('mapHint').textContent = `${no}번 ${d.nm || ''} · ${t.icon} ${t.name} · ▶ 재생을 눌러요`;
+  showCard();                                   // 번호를 누르면 여행 계획서부터
 }
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -193,14 +192,21 @@ async function play(){
 
 /* ---------- 발표 화면 ---------- */
 function showCard(){
-  const d = cur, t = THEMES[d.th];
-  $('showCard').innerHTML = `<div class="meta"><span>${d.no ?? curNo}번 ${esc(d.nm || '')}</span><span style="color:${t.color}">${t.icon} ${t.name}</span><span>추천: ${esc(d.tg || '-')}</span><b>${d.sc}점</b></div>
-    <h1>📜 ${esc(d.cn || t.name + ' 코스')}</h1>${d.ln ? `<div style="font-weight:800">💬 ${esc(d.ln)}</div>` : ''}
-    <div class="spots">${d.s.map((id, i) => { const s = SPOT[id];
-      return `<div class="sp${d.st.includes(id) ? ' ok' : ''}"><b>${d.st.includes(id) ? '🏅' : i + 1 + '.'} ${esc(s.name)}</b><small>${esc(s.intro)}</small><small>🔎 ${esc(s.mission)}</small></div>`; }).join('')}</div>
-    <button class="primary" id="showClose" style="width:100%">닫기</button>`;
-  $('show').classList.add('show'); $('showClose').onclick = () => $('show').classList.remove('show');
+  const d = cur; if (!d) return;
+  $('showCard').innerHTML = planSheetHTML({ ...d, no:d.no ?? curNo }) + `<div class="pbtns">
+      <button class="primary" id="showRun">🚕 지도에서 달려 보기</button>
+      <button class="primary" id="showImg" style="background:#4c97ff;box-shadow:0 4px 0 #2f6fd0">🖼 이미지 저장</button>
+      <button class="ghost" id="showClose">닫기</button></div>`;
+  $('show').classList.add('show');
+  const close = () => $('show').classList.remove('show');
+  $('showClose').onclick = close;
+  $('showRun').onclick = () => { close(); play(); };
+  $('showImg').onclick = async () => {
+    try { await savePlanImage({ ...d, no:d.no ?? curNo }, `${d.no ?? curNo}번_여행계획서`); toast('🖼 저장했어요'); }
+    catch(e){ toast('저장하지 못했어요: ' + e.message); }
+  };
 }
+$('show').onclick = e => { if (e.target.id === 'show') $('show').classList.remove('show'); };
 
 /* ---------- 구글 시트 ---------- */
 async function load(){
@@ -219,7 +225,26 @@ async function clearAll(){
   try { await fetch(SERVER, { method:'POST', mode:'no-cors', headers:{ 'Content-Type':'text/plain' }, body:JSON.stringify({ action:'clear' }) }); } catch(e){}
   await load();
   if (Object.keys(DATA).length){ $('resetMsg').textContent = '지우지 못했어요. Apps Script 배포를 확인해 주세요'; return; }
-  $('resetBox').classList.remove('show'); cur = null; resetRun(); $('info').innerHTML = '';
+  $('resetBox').classList.remove('show'); clearView(); refreshCards();
+  toast('↺ 초기화했어요');
+}
+let toastTimer;
+function toast(msg){ const t = $('toast'); t.textContent = msg; t.className = 'show ok'; clearTimeout(toastTimer); toastTimer = setTimeout(() => t.className = '', 2500); }
+/* 화면을 처음 상태로: 선택·재생·발표 화면 닫기 */
+function clearView(){
+  resetRun(); playing = false; cur = null; curNo = null;
+  $('bPlay').textContent = '▶ 재생'; ['bPlay', 'bReset', 'bShow'].forEach(id => $(id).disabled = true);
+  $('nums').querySelectorAll('.num-card').forEach(c => c.classList.remove('sel'));
+  $('who2').textContent = '📜 친구의 코스';
+  $('info').innerHTML = '<div class="insertHint">👈 번호를 누르세요</div>';
+  $('mapHint').textContent = '번호를 눌러 친구의 코스를 확인해요';
+  $('show').classList.remove('show');
+}
+function demoClear(){
+  Object.keys(DATA).forEach(k => delete DATA[k]);
+  $('resetBox').classList.remove('show'); clearView(); refreshCards();
+  $('status').textContent = '예시 데이터를 지웠어요 (새로고침하면 다시 보여요)';
+  toast('↺ 초기화했어요');
 }
 
 /* ---------- 시작 ---------- */
@@ -231,9 +256,14 @@ $('bgImg').onload = $('bgImg').onerror = () => {
   buildBoard(); makeCards(); updateCellVar(); resetRun();
   $('demoTag').textContent = DEMO ? '예시 데이터' : '실시간';
   if (DEMO){ demoData(); refreshCards(); $('status').textContent = '예시 데이터 (config.js에 주소를 넣으면 실제 기록)'; }
-  else { load(); setInterval(load, 5000); $('bClear').hidden = false;
-    $('bClear').onclick = () => { $('resetMsg').textContent = ''; $('resetBox').classList.add('show'); };
-    $('resetGo').onclick = clearAll; $('resetNo').onclick = () => $('resetBox').classList.remove('show'); }
+  else { load(); setInterval(load, 5000); }
+  $('bInit').onclick = () => {
+    $('resetMsg').textContent = '';
+    $('resetTxt').textContent = DEMO ? '예시 기록과 화면을 모두 지워요.' : '학생들이 보낸 기록이 모두 지워지고 되돌릴 수 없어요.';
+    $('resetBox').classList.add('show');
+  };
+  $('resetGo').onclick = DEMO ? demoClear : clearAll;
+  $('resetNo').onclick = () => $('resetBox').classList.remove('show');
 };
 $('bgImg').src = BG_IMAGE;
 addEventListener('resize', updateCellVar);

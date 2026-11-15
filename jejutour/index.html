@@ -4,17 +4,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>제주 헤리티지 자율주행 택시</title>
-<script src="config.js?v=20261111g"></script>
-<script src="heritage.js?v=20261111g"></script>
-<link rel="stylesheet" href="common.css?v=20261111g">
-<link rel="stylesheet" href="planner.css?v=20261111g">
+<script src="config.js?v=20261115e"></script>
+<script src="heritage.js?v=20261115e"></script>
+<link rel="stylesheet" href="common.css?v=20261115e">
+<link rel="stylesheet" href="planner.css?v=20261115e">
 </head>
 <body data-step="0" class="resizable">
 <div id="app">
   <!-- 왼쪽: 단계별 안내 -->
   <section class="panel" id="left">
-    <h2><span id="leftTitle">🧭 여행 플래너</span><button id="who" class="chipBtn" hidden></button></h2>
-    <div class="sizeCtl">🔍 코딩 칸 크기 <button id="zOut" title="작게">−</button><span class="lvl" id="zLvl">보통</span><button id="zIn" title="크게">＋</button><button id="btnInit" class="initBtn" title="처음부터 다시">↺ 초기화</button></div>
+    <h2><span id="leftTitle">🧭 여행 플래너</span><button id="who" class="chipBtn" hidden></button><button id="btnInit" class="initBtn" title="테마·코스·코드를 지우고 처음부터">↺ 초기화</button></h2>
+    <div class="sizeCtl">🔍 코딩 칸 크기 <button id="zOut" title="작게">−</button><span class="lvl" id="zLvl">보통</span><button id="zIn" title="크게">＋</button></div>
     <div class="steps"><span data-s="1">① 테마</span><span data-s="2">② 코스</span><span data-s="3">③ 코딩</span><span data-s="4">④ 완성</span></div>
 
     <div class="pane" id="p1">
@@ -80,10 +80,13 @@
 <div id="spotPop" class="overlay"><div class="card spotCard" id="spotCard"></div></div>
 <!-- 스탬프 -->
 <div id="stampPop" class="overlay"><div class="card stampCard" id="stampCard"></div></div>
+<!-- 완성 -->
+<div id="donePop" class="overlay"><div class="card" id="doneCard"></div></div>
+<div id="planPop" class="overlay planPop"><div class="card" id="planCard"></div></div>
 <div id="toast"></div>
 <canvas id="confetti"></canvas>
 
-<script src="common.js?v=20261111g"></script>
-<script src="planner.js?v=20261111g"></script>
+<script src="common.js?v=20261115e"></script>
+<script src="planner.js?v=20261115e"></script>
 </body>
 </html>

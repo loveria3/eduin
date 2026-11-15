@@ -224,4 +224,25 @@ body.dragging #stack .cblk .slot{outline-color:rgba(255,171,25,.55); outline-off
 /* 단계 탭 누르기 · 초기화 */
 .steps span{cursor:pointer;}
 .steps span:active{transform:scale(.95);}
-.initBtn{width:auto !important; margin-left:auto; padding:0 .6em; background:#ffe1dc !important; color:#d23c28 !important;}
+.initBtn{border:0; border-radius:1em; margin-left:.35em; padding:.25em .7em; background:#ffe1dc; color:#d23c28; font:inherit; font-weight:900; font-size:.75em; cursor:pointer; flex:none;}
+.initBtn:active{transform:scale(.94); background:#ffcfc7;}
+#left h2 #who[hidden] + .initBtn{margin-left:auto;}
+
+/* 완성하기: 잠김 표시 · 완성 알림 · 코스 카드 반짝 */
+#btnDone.locked{background:#c3cad4 !important; box-shadow:none;}
+#btnDone.locked::after{content:" (스탬프 필요)"; font-size:.8em; opacity:.9;}
+#doneCard h1{font-size:2.4em; color:#ff6f00; margin:.1em 0;}
+#doneCard .doneBtns{display:flex; flex-direction:column; gap:.5em; margin:.6em 0;}
+#doneCard .doneBtns button{margin:0; width:100%;}
+#doneCard .miss{background:#eef6ff; color:#2b5a9a; border-radius:12px; padding:.4em .7em; font-weight:800;}
+#left.flash{animation:leftFlash .9s ease-in-out 3;}
+@keyframes leftFlash{50%{box-shadow:0 0 0 5px #ffb300, 0 0 24px 6px rgba(255,179,0,.7);}}
+.sizeCtl{white-space:nowrap;} .initBtn{white-space:nowrap; flex:none;}
+/* 멈춘 다음 블록 표시 · 처음부터 버튼 */
+.row.next .blk{filter:drop-shadow(2px 0 0 #4c97ff) drop-shadow(-2px 0 0 #4c97ff) drop-shadow(0 2px 0 #4c97ff) drop-shadow(0 -2px 0 #4c97ff);}
+#btnStop.restart{background:#4c97ff !important;}
+/* 코스 카드 입력 칸 */
+.field textarea{font:inherit; font-weight:700; padding:.5em .7em; border:3px solid #dbe5ef; border-radius:12px; outline:none; background:#fff; resize:vertical;}
+.field textarea:focus, .field select:focus{border-color:#4c97ff;}
+.courseCard .cardTip{margin:.3em 0; font-size:.82em; color:#2b5a9a; font-weight:800; background:#eef6ff; border-radius:10px; padding:.3em .6em;}
+.courseCard .field{margin-top:.45em;}

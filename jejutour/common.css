@@ -213,3 +213,36 @@ body.planning .spot{cursor:pointer;}
 .chip.ok::after{content:"✓";}
 
 [hidden]{display:none !important;}
+
+/* ---------- 여행 계획서 (코스 카드 · 발표 화면 · 이미지) ---------- */
+.planSheet{--tc:#1C7557; background:#fff; color:#24323f; text-align:left; font-size:15px; line-height:1.4; padding:22px 24px 16px; border-radius:18px;
+  border-top:10px solid var(--tc); font-family:inherit; box-sizing:border-box;}
+.planSheet *{box-sizing:border-box;}
+.planSheet .ptop{display:flex; justify-content:space-between; gap:1em; font-weight:900; font-size:.82em; color:#6b7c90;}
+.planSheet h1{margin:.15em 0 .2em; font-size:1.9em; color:#1f2a35; line-height:1.2;}
+.planSheet .ptags{display:flex; flex-wrap:wrap; gap:.4em;}
+.planSheet .ptags span{background:#f1f5f9; border-radius:1em; padding:.15em .7em; font-weight:800; font-size:.85em; color:#41526a;}
+.planSheet .ptags .th{background:var(--tc); color:#fff;} .planSheet .ptags .sc{background:#fff1e0; color:#e06a00;}
+.planSheet .pline{margin:.55em 0 .7em; font-weight:800; color:#33465c;}
+.planSheet .pgrid{display:grid; grid-template-columns:1.45fr 1fr; gap:16px; align-items:start;}
+.planSheet .pv{display:grid; grid-template-columns:3.4em 2em 1fr; gap:.45em; align-items:start; padding:.45em .3em; border-radius:12px;}
+.planSheet .pv .tm{font-weight:900; color:var(--tc); padding-top:.1em;}
+.planSheet .pv .no{width:1.8em; height:1.8em; border-radius:50%; background:#ff8c1a; color:#fff; font-weight:900; display:flex; align-items:center; justify-content:center; font-size:.95em;}
+.planSheet .pv.pv_start .no, .planSheet .pv.pv_end .no, .planSheet .pv.pv_lunch .no{background:#eef2f6;}
+.planSheet .pv b{font-size:1.05em;} .planSheet .pv i{font-style:normal; font-size:.8em; color:#6b7c90; font-weight:700;}
+.planSheet .pv p{margin:.2em 0 0; font-size:.86em; color:#3e4f63;}
+.planSheet .pv p.say{color:#2b5a9a; font-weight:700;}
+.planSheet .pv.pvSpot{background:#f7fafc; box-shadow:0 0 0 2px #e6edf4 inset; margin:.15em 0;}
+.planSheet .pv.pvSpot.ok{box-shadow:0 0 0 2px #12bd8c inset; background:#f2fcf8;}
+.planSheet .pv.pvMove{padding:.1em .3em; color:#6b7c90; font-size:.82em;} .planSheet .pv.pvMove b{font-size:1em; color:#41526a;}
+.planSheet .miniMap{width:100%; display:block; border-radius:12px;}
+.planSheet .stats{display:grid; grid-template-columns:repeat(3, 1fr); gap:6px; margin:10px 0;}
+.planSheet .stats div{background:#f7fafc; border-radius:10px; text-align:center; font-size:.75em; color:#6b7c90; font-weight:800; padding:.35em .2em;}
+.planSheet .stats b{display:block; font-size:1.45em; color:#1f2a35;}
+.planSheet .pbox{border:2px solid #e6edf4; border-radius:12px; padding:.45em .7em; margin-top:8px;}
+.planSheet .pbox h4{margin:0 0 .2em; font-size:.88em; color:var(--tc);} .planSheet .pbox p{margin:0; font-size:.88em; white-space:pre-wrap;}
+.planSheet .pbox .pph{color:#b3bfcc;}
+.planSheet .pfoot{margin-top:12px; padding-top:8px; border-top:2px dashed #e6edf4; font-size:.75em; color:#8595a8; font-weight:800; display:flex; justify-content:space-between; flex-wrap:wrap; gap:.5em;}
+.planPop .card{width:min(96vw, 980px) !important; max-height:94vh; overflow:auto; padding:14px !important; background:#eef3f8 !important;}
+.planPop .pbtns{display:flex; gap:8px; margin-top:10px;} .planPop .pbtns button{flex:1; margin:0;}
+@media (max-width:760px){ .planSheet .pgrid{grid-template-columns:1fr;} }

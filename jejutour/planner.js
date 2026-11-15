@@ -12,7 +12,7 @@ let theme = null, course = [], prog = [], pickSlot = null;
 let st, running = false, stopFlag = false;
 let last = { stamps:[], crashes:0 };              // 마지막 실행 결과
 let best = 0;
-let extra = { target:'친구', line:'' };
+let extra = { target:'친구', line:'', season:'', why:'', tip:'' };
 
 function save(){
   try { localStorage.setItem('jejuHeritage', JSON.stringify({ me, theme, course, prog, cn:$('courseName').value, extra, last, best,
@@ -158,7 +158,7 @@ function addBlock(k){                         // 팔레트 블록을 '톡' 누�
   stack.scrollTop = stack.scrollHeight;
 }
 /* 코드가 바뀌면 스탬프는 다시 실행해서 받아요 */
-function changed(){ if (last.stamps.length || last.crashes){ last = { stamps:[], crashes:0 }; drawDots(); drawMission(); } save(); drawScore(); }
+function changed(){ if (paused){ paused = null; runButtons(); } if (last.stamps.length || last.crashes){ last = { stamps:[], crashes:0 }; drawDots(); drawMission(); } save(); drawScore(); }
 function removeAt(path){ const { lp, i } = parentOf(path); const list = listAt(prog, lp); return list ? list.splice(i, 1)[0] : null; }
 function drawStack(snapPath = null){
   stack.innerHTML = `<div class="hatRow">${HAT_SVG}</div>` + rowsHTML(prog, '', true) +
@@ -289,22 +289,36 @@ const Drag = (() => {
 function drawScore(){
   const sc = calcScore(prog, last.stamps.length, last.crashes);
   $('score').innerHTML = sc.parts.map(p => `<span title="${p[0]}">${p[0].split(' ')[0]} ${p[1]}</span>`).join('') + `<span class="tot">${sc.total}점</span>`;
-  $('btnDone').disabled = !last.stamps.length;
+  $('btnDone').classList.toggle('locked', !last.stamps.length);
   return sc;
 }
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
+/* 멈춤 → 이어서 실행: 코드를 안 고쳤으면 멈춘 자리에서 계속 */
+let paused = null;
+function runButtons(){
+  $('btnRun').innerHTML = paused ? '<span class="big">▶</span> 이어서 실행' : '<span class="big">▶</span> 실행';
+  $('btnStop').innerHTML = !running && paused ? '↺ 처음부터' : '■ 멈춤';
+  $('btnStop').classList.toggle('restart', !running && !!paused);
+}
 async function run(){
   if (running || !prog.length){ if (!prog.length) toast('블록을 먼저 쌓아요!', 'bad'); return; }
   Sound.unlock(); running = true; stopFlag = false;
   document.body.classList.add('running');
   drawStack();
   const rows = () => stack.querySelectorAll('.row');
-  resetCar(); await sleep(250);
-  const got = [], before = new Set(last.stamps); let crashes = 0;
+  const key = JSON.stringify(prog);
   const steps = expand(prog);
-  for (const s of steps){
-    if (stopFlag) break;
+  let got = [], crashes = 0, from = 0, finishNow = false;
+  if (paused && paused.key === key){            // 이어서
+    ({ got, crashes } = paused); from = paused.idx; st = { ...paused.st }; drawCar(false);
+    toast('멈춘 자리에서 이어서 달려요 ▶');
+  } else { resetCar(); await sleep(250); }
+  paused = null; runButtons();
+  const before = new Set(got);
+  for (let si = from; si < steps.length; si++){
+    const s = steps[si];
+    if (stopFlag){ paused = { idx:si, st:{ ...st }, got:got.slice(), crashes, key }; break; }
     rows().forEach(r => r.classList.toggle('now', r.dataset.path === s.src));
     if (s.k === 'loop'){ await sleep(120); continue; }
     if (s.k === 'cell'){
@@ -326,49 +340,79 @@ async function run(){
       if (here.length && !here.some(h => saysName(s.text, h)))
         toast(`여기는 ${here.map(h => h.key).join('·')}! 이름을 넣어 안내해요`, 'bad');
       const fresh = got.filter(id => !before.has(id));
-      if (fresh.length){ last = { stamps:got.slice(), crashes }; drawDots(); drawMission(); await showStamp(fresh[fresh.length - 1]); before.add(fresh[fresh.length - 1]); }
+      if (fresh.length){
+        last = { stamps:got.slice(), crashes }; drawDots(); drawMission();
+        const all = course.every(id => got.includes(id));        // 세 번째 미션까지 끝 → '완성' 버튼
+        await showStamp(fresh[fresh.length - 1], all); before.add(fresh[fresh.length - 1]);
+        if (all){ finishNow = true; break; }
+      }
     }
   }
+  if (paused) stack.querySelector(`.row[data-path="${steps[paused.idx].src}"]`)?.classList.add('next');
   rows().forEach(r => r.classList.remove('now'));
   last = { stamps:got, crashes };
-  running = false; document.body.classList.remove('running');
+  running = false; document.body.classList.remove('running'); runButtons();
   drawDots(); drawMission();
   const sc = drawScore();
   best = Math.max(best, sc.total); save();
+  if (finishNow){ Voice.stop(); go(4); showDone(); return; }
   if (!stopFlag && got.length === course.length){
     Sound.win(); Confetti.burst(); setTimeout(Confetti.burst, 1300);
     toast(`🎉 스탬프 3개 완성! ${sc.total}점 · 🏁 완성하기를 눌러요`, 'ok');
     const b = $('btnDone'); b.classList.remove('nudge'); void b.offsetWidth; b.classList.add('nudge');
   }
 }
-function showStamp(id){
+function showStamp(id, final){
   const s = SPOT[id];
   Sound.win();
   $('stampCard').innerHTML = `<h1>🏅</h1><div class="stp"><small>HERITAGE</small>${esc(s.key)}<small>${new Date().getMonth() + 1}.${new Date().getDate()}</small></div>
-    <div class="msg">${esc(s.name)} 스탬프 획득!</div><div class="miss">🔎 탐험 미션: ${esc(s.mission)}</div><button class="primary" id="stOk">계속 달리기 ▶</button>`;
+    <div class="msg">${esc(s.name)} 스탬프 획득!</div><div class="miss">🔎 탐험 미션: ${esc(s.mission)}</div>${final
+      ? '<div class="msg">🎉 미션 3곳을 모두 완료했어요!</div><button class="primary" id="stOk">🏁 완성</button>'
+      : '<button class="primary" id="stOk">계속 달리기 ▶</button>'}`;
   $('stampPop').classList.add('show');
   return new Promise(res => $('stOk').onclick = () => { $('stampPop').classList.remove('show'); res(); });
 }
 
-/* ④ 코스 카드 */
+/* ④ 코스 카드 → 여행 계획서 */
+function myRec(){
+  const sc = calcScore(prog, last.stamps.length, last.crashes);
+  return { no:me.no, th:theme, s:course, cn:$('courseName').value.trim(), tg:extra.target, ln:extra.line,
+    se:extra.season, why:extra.why, tip:extra.tip, p:prog, st:last.stamps, sc:sc.total };
+}
 function drawCard(){
   const t = THEMES[theme], sc = calcScore(prog, last.stamps.length, last.crashes);
+  const opt = (list, v) => list.map(x => `<option${x === v ? ' selected' : ''}>${x}</option>`).join('');
   $('card').innerHTML = `<div class="courseCard">
     <h3>📜 ${esc($('courseName').value.trim() || t.name + ' 코스')}</h3>
-    <div><span class="cat" style="background:${t.color};color:#fff">${t.icon} ${t.name}</span> ${me.no}번</div>
-    ${course.map((id, i) => `<div class="mRow${last.stamps.includes(id) ? ' ok' : ''}"><span class="st">${last.stamps.includes(id) ? '✓' : i + 1}</span>${esc(SPOT[id].name)}</div>`).join('')}
-    <div class="sc"><span>스탬프 ${last.stamps.length}/3</span><span>블록 ${prog.length}개</span><span>반복 ${prog.filter(b => b.t === 'rep').length}개</span><b>${sc.total}점</b></div>
-    <label class="field">누구에게 추천해요?<select id="cTarget">${['가족', '친구', '혼자', '어르신', '외국인 관광객'].map(v => `<option${v === extra.target ? ' selected' : ''}>${v}</option>`).join('')}</select></label>
+    <div><span class="cat" style="background:${t.color};color:#fff">${t.icon} ${t.name}</span> ${me.no}번 · <b>${sc.total}점</b> · 스탬프 ${last.stamps.length}/3</div>
+    <p class="cardTip">✏️ 아래 칸을 채우면 <b>여행 계획서</b>가 완성돼요</p>
+    <label class="field">누구에게 추천해요?<select id="cTarget">${opt(['가족', '친구', '혼자', '어르신', '외국인 관광객', '어린이와 함께'], extra.target)}</select></label>
+    <label class="field">언제 가면 좋아요?<select id="cSeason"><option value="">고르기</option>${opt(['봄', '여름', '가을', '겨울', '사계절 언제나'], extra.season)}</select></label>
     <label class="field">한 줄 소개<input id="cLine" maxlength="40" value="${esc(extra.line)}" placeholder="예) 제주의 시간을 거슬러 오르는 여행"></label>
+    <label class="field">이 코스를 추천하는 이유<textarea id="cWhy" maxlength="120" rows="3" placeholder="예) 화산이 만든 오름과 바위를 하루에 다 볼 수 있어요">${esc(extra.why)}</textarea></label>
+    <label class="field">준비물 · 여행 팁<input id="cTip" maxlength="60" value="${esc(extra.tip)}" placeholder="예) 편한 운동화, 물, 오름은 바람이 세요"></label>
   </div>
-  <button class="primary" id="btnSb3">💾 핑퐁 스크래치 파일 저장</button>
+  <button class="primary" id="btnPlan">👀 여행 계획서 보기 · 🖼 이미지 저장</button>
+  <button class="primary" id="btnSb3" style="background:#ffab19;box-shadow:0 4px 0 #d98b00">💾 핑퐁 스크래치 파일 저장</button>
   ${SERVER ? '<button class="primary" id="btnSend" style="background:#4c97ff;box-shadow:0 4px 0 #2f6fd0">📮 선생님께 보내기</button>' : ''}
   <button class="ghost" id="btnBack">← 코딩으로 돌아가기</button>`;
-  $('cTarget').onchange = () => { extra.target = $('cTarget').value; save(); };
-  $('cLine').oninput = () => { extra.line = $('cLine').value; save(); };
+  const bind = (id, k) => $(id).oninput = $(id).onchange = () => { extra[k] = $(id).value; save(); };
+  bind('cTarget', 'target'); bind('cSeason', 'season'); bind('cLine', 'line'); bind('cWhy', 'why'); bind('cTip', 'tip');
   $('btnBack').onclick = () => go(3);
+  $('btnPlan').onclick = showPlan;
   $('btnSb3').onclick = saveSb3;
   if (SERVER) $('btnSend').onclick = send;
+}
+function planFile(){ return `${me.no}번_${$('courseName').value.trim() || THEMES[theme].name}_여행계획서`.replace(/[\\/:*?"<>|\s]+/g, '_'); }
+async function savePlan(){
+  toast('🖼 이미지를 만드는 중…');
+  try { await savePlanImage(myRec(), planFile()); toast('🖼 계획서 이미지를 저장했어요! 패들렛에 올려요', 'ok'); }
+  catch(e){ toast('이미지를 저장하지 못했어요: ' + e.message, 'bad'); }
+}
+function showPlan(){
+  $('planCard').innerHTML = planSheetHTML(myRec()) + `<div class="pbtns"><button class="primary" id="plSave">🖼 이미지로 저장 (패들렛용)</button><button class="ghost" id="plClose">닫기</button></div>`;
+  $('planPop').classList.add('show');
+  $('plSave').onclick = savePlan; $('plClose').onclick = () => $('planPop').classList.remove('show');
 }
 async function saveSb3(){
   try {
@@ -381,7 +425,7 @@ let sending = false;
 async function send(){
   if (sending) return; sending = true;
   const sc = calcScore(prog, last.stamps.length, last.crashes);
-  const rec = { th:theme, s:course, cn:$('courseName').value.trim(), tg:extra.target, ln:extra.line, p:prog, st:last.stamps, sc:sc.total };
+  const rec = myRec(); delete rec.no;
   toast('보내는 중…');
   try {
     await fetch(SERVER, { method:'POST', mode:'no-cors', headers:{ 'Content-Type':'text/plain' },
@@ -411,7 +455,7 @@ function setupStart(saved){
     $('who').hidden = false; $('who').textContent = `${me.no}번 ✎`;
     $('start').classList.remove('show');
     const s = saved && saved.theme && saved.me && saved.me.no === me.no ? saved : null;
-    if (s){ theme = s.theme; course = s.course || []; prog = normProg(s.prog || []); last = s.last || last; best = s.best || 0; extra = s.extra || extra;
+    if (s){ theme = s.theme; course = s.course || []; prog = normProg(s.prog || []); last = s.last || last; best = s.best || 0; extra = Object.assign({ target:'친구', line:'', season:'', why:'', tip:'' }, s.extra || {});
       $('courseName').value = s.cn || ''; go(+s.step || 2); }
     else go(1);
     if (!Voice.available) toast('🔇 이 기기는 음성이 안 나와요 → 말풍선으로 보여줘요');
@@ -435,7 +479,7 @@ document.querySelectorAll('.steps span').forEach(sp => sp.onclick = () => {
 $('btnInit').onclick = () => {
   if (running) return;
   if (!confirm('테마·코스·코드를 모두 지우고 처음부터 할까요?')) return;
-  theme = null; course = []; prog = []; last = { stamps:[], crashes:0 }; best = 0; extra = { target:'친구', line:'' };
+  theme = null; course = []; prog = []; last = { stamps:[], crashes:0 }; best = 0; extra = { target:'친구', line:'', season:'', why:'', tip:'' };
   $('courseName').value = ''; resetCar(); drawStack(); go(1);
   toast('처음부터 다시 시작해요 ↺');
 };
@@ -445,12 +489,37 @@ $('btnReroll').onclick = () => { course = recommend(theme, course.join()); pickS
 $('btnToCode').onclick = () => { prog = prog || []; go(3); };
 $('courseName').oninput = save;
 $('btnRun').onclick = run;
-$('btnStop').onclick = () => { stopFlag = true; Voice.stop(); };
+$('btnStop').onclick = () => {
+  if (running){ stopFlag = true; Voice.stop(); return; }        // ■ 멈춤
+  if (paused){ paused = null; resetCar(); drawStack(); runButtons(); toast('처음 자리(공항)로 돌아왔어요 ↺'); }
+};
 $('btnDel').onclick = () => { if (running || !prog.length) return; prog.pop(); drawStack(); changed(); };
 $('btnClear').onclick = () => { if (running || !prog.length) return; if (confirm('코드를 모두 지울까요?')){ prog = []; drawStack(); changed(); } };
-$('btnDone').onclick = () => go(4);
+$('btnDone').onclick = () => {
+  if (running) return;
+  Sound.unlock();
+  if (!last.stamps.length){ Sound.warn(); toast('스탬프를 1개 이상 받아야 완성할 수 있어요 🏅', 'bad'); return; }
+  go(4); showDone();
+};
+/* 완성 알림: 눌렀다는 게 확실히 보이게 */
+function showDone(){
+  const sc = calcScore(prog, last.stamps.length, last.crashes);
+  Sound.win(); Confetti.burst();
+  $('doneCard').innerHTML = `<h1>🏁 코스 완성!</h1>
+    <div class="msg">스탬프 ${last.stamps.length}/${course.length} · ${sc.total}점</div>
+    <div class="doneBtns"><button class="primary" id="dnPlan">🖼 여행 계획서 이미지 저장</button>
+    <button class="primary" id="dnSave" style="background:#ffab19;box-shadow:0 4px 0 #d98b00">💾 핑퐁 스크래치 파일 저장</button>
+    <button class="ghost" id="dnCard">✏️ 계획서 내용 채우기</button></div>
+    <div class="miss">왼쪽 코스 카드에 추천 이유·준비물을 쓰면 계획서가 더 알차져요 👈</div>`;
+  $('donePop').classList.add('show');
+  const close = () => { $('donePop').classList.remove('show'); const l = $('left'); l.classList.remove('flash'); void l.offsetWidth; l.classList.add('flash'); };
+  $('dnSave').onclick = () => { saveSb3(); };
+  $('dnPlan').onclick = () => { savePlan(); };
+  $('dnCard').onclick = close;
+}
 $('btnSound').onclick = () => { Sound.unlock(); const on = Sound.toggle(); Voice.set(on); $('btnSound').textContent = on ? '🔊' : '🔇'; };
 $('spotPop').onclick = e => { if (e.target.id === 'spotPop') $('spotPop').classList.remove('show'); };
+$('planPop').onclick = e => { if (e.target.id === 'planPop') $('planPop').classList.remove('show'); };
 
 /* ---------- 코딩 칸 크기 조절: 크게 하면 가운데 지도가 줄어요 ---------- */
 const Layout = (() => {
