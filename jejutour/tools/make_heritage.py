@@ -11,15 +11,16 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent.parent
 
 # ---- 지도 그림 위 알려진 점(픽셀)과 실제 위경도 → 변환식 맞추기 ----
-CTRL = [  # (x, y, lat, lng)
-    (492, 260, 33.507, 126.493),  # 제주국제공항
-    (255, 343, 33.498, 126.452), (172, 446, 33.463, 126.310), (118, 520, 33.394, 126.240),
-    (88, 656, 33.295, 126.164), (222, 789, 33.199, 126.290), (268, 736, 33.238, 126.312),
-    (234, 653, 33.306, 126.289), (410, 667, 33.250, 126.412), (509, 662, 33.246, 126.565),
-    (585, 591, 33.268, 126.620), (680, 610, 33.272, 126.667), (732, 591, 33.322, 126.842),
-    (786, 413, 33.387, 126.799), (822, 297, 33.489, 126.808), (708, 206, 33.538, 126.772),
-    (732, 135, 33.556, 126.796), (891, 162, 33.523, 126.862), (955, 222, 33.458, 126.942),
-    (981, 286, 33.424, 126.931), (1001, 120, 33.506, 126.953),
+CTRL = [  # (x, y, lat, lng) — config.js 의 MAP_POINTS 와 같게
+    (1838, 358, 33.506, 126.953), (353, 1173, 33.170, 126.272), (345, 1301, 33.118, 126.267),
+    (120, 768, 33.295, 126.164), (1820, 476, 33.458, 126.942), (400, 1116, 33.199, 126.290),
+    (1436, 216, 33.558, 126.758),
+    (895, 352, 33.516, 126.512),
+    (745, 382, 33.498, 126.452),
+    (540, 428, 33.463, 126.31),
+    (365, 508, 33.394, 126.24),
+    (232, 662, 33.348, 126.172),
+    (1150, 270, 33.543, 126.669),
 ]
 A = np.array([[lat, lng, 1] for _, _, lat, lng in CTRL])
 coef_x = np.linalg.lstsq(A, np.array([c[0] for c in CTRL]), rcond=None)[0]
@@ -38,14 +39,14 @@ def to_px(lat, lng):
     return tuple(affine(lat, lng) + corr)
 
 # 지도(config.js와 같아야 함): 땅이 아닌 칸에 떨어진 장소는 가장 가까운 땅 칸 안으로 옮김
-GL, GT, GW, GH = 8.5, 9, 1047.5, 898
-MAPS = ['~~~oooo', '~~ooooo', 'oooMooo', 'oooooo~', 'oooooo~', '~o~~~~~']
-CW, CH = GW / 7, GH / 6
-def cell_of(x, y): return min(6, max(1, int((y - GT) // CH) + 1)), min(7, max(1, int((x - GL) // CW) + 1))
+GL, GT, GW, GH = 74, 34, 1851, 1346
+MAPS = ['~~~~~~~~~~~', '~~~~ooooooo', '~oooooooooo', 'oooooMooooo', 'oooooooooo~', 'ooooooooo~~', '~o~~o~~~~~~', '~o~~~~~~~~~']
+CW, CH = GW / 11, GH / 8
+def cell_of(x, y): return min(8, max(1, int((y - GT) // CH) + 1)), min(11, max(1, int((x - GL) // CW) + 1))
 def to_land(x, y):
     r, c = cell_of(x, y)
     if MAPS[r - 1][c - 1] == 'o': return x, y
-    best = min(((rr, cc) for rr in range(1, 7) for cc in range(1, 8) if MAPS[rr - 1][cc - 1] == 'o'),
+    best = min(((rr, cc) for rr in range(1, 9) for cc in range(1, 12) if MAPS[rr - 1][cc - 1] == 'o'),
                key=lambda rc: (GL + (rc[1] - .5) * CW - x) ** 2 + (GT + (rc[0] - .5) * CH - y) ** 2)
     x0, y0 = GL + (best[1] - 1) * CW, GT + (best[0] - 1) * CH
     m = CW * .2
@@ -157,12 +158,30 @@ D = [
  (100,'제주칠머리당영등굿-전수관','영등굿','M','무형',33.519,126.545,'바람의 신 영등신을 맞이하는 해녀들의 굿이에요(유네스코 무형유산).','영등신이 오가는 날짜 알아보기','제주시 사라봉동'),
 ]
 
+# 지도 그림에서 '땅' 픽셀 (연두·초록·크림색 도로)
+from PIL import Image as _I
+_a = np.asarray(_I.open(HERE / 'jeju-map.png').convert('RGB')).astype(int)
+_R, _G, _B = _a[..., 0], _a[..., 1], _a[..., 2]
+LAND = ((_G > _R + 8) & (_G > _B + 15)) | ((_R > 235) & (_G > 235) & (_B > 200) & (_B < 235))
+def to_land_px(x, y, inset=10, rad=120):
+    """점이 바다 위면 가장 가까운 땅 픽셀로 옮기고, 해안선에서 조금 안쪽으로"""
+    xi, yi = int(round(x)), int(round(y))
+    H, W = LAND.shape
+    if 0 <= yi < H and 0 <= xi < W and LAND[max(0,yi-3):yi+4, max(0,xi-3):xi+4].mean() > .6: return x, y
+    y0, y1, x0, x1 = max(0, yi-rad), min(H, yi+rad), max(0, xi-rad), min(W, xi+rad)
+    ys, xs = np.nonzero(LAND[y0:y1, x0:x1])
+    if not len(xs): return x, y
+    d = (xs + x0 - x) ** 2 + (ys + y0 - y) ** 2; k = d.argmin()
+    nx, ny = xs[k] + x0, ys[k] + y0
+    v = np.array([nx - x, ny - y]); n = np.linalg.norm(v) or 1
+    return float(nx + v[0] / n * inset), float(ny + v[1] / n * inset)
+
 out = []
 for row in D:
     i, name, key, th, cat, lat, lng, intro, mission, area = row[:10]
     island = len(row) > 10 and row[10]
     x, y = to_px(lat, lng)
-    if not island: x, y = to_land(x, y)
+    if not island: x, y = to_land(*to_land_px(x, y))
     out.append(dict(id=i, name=name, key=key, theme=th, cat=cat, lat=lat, lng=lng, x=round(x), y=round(y),
                     intro=intro, mission=mission, area=area, island=bool(island)))
 

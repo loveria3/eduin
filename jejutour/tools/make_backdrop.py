@@ -13,8 +13,9 @@ HERE = Path(__file__).resolve().parent.parent
 src = Image.open(HERE / 'jeju-map.png').convert('RGB')
 W, H = 960, 720                                   # 스크래치 무대 480×360 의 2배
 bg = Image.new('RGB', (W, H), (214, 238, 248))
-w = round(src.width * H / src.height)
-bg.paste(src.resize((w, H), Image.LANCZOS), ((W - w) // 2, 0))
+k = min(W / src.width, H / src.height)                      # 무대에 꼭 맞게 (가로가 길면 가로에 맞춤)
+w, h = round(src.width * k), round(src.height * k)
+bg.paste(src.resize((w, h), Image.LANCZOS), ((W - w) // 2, (H - h) // 2))
 buf = io.BytesIO(); bg.save(buf, 'JPEG', quality=86, optimize=True)
 b64 = base64.b64encode(buf.getvalue()).decode()
 (HERE / 'backdrop.js').write_text(
