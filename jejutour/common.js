@@ -498,7 +498,7 @@ const SB3 = (() => {
       return { bytes:new Uint8Array(await blob.arrayBuffer()), fmt:'png' };
     } catch(e){
       if (!window.BACKDROP_JPG) await new Promise((res, rej) => {
-        const s = document.createElement('script'); s.src = 'backdrop.js?v=20261117t'; s.onload = res; s.onerror = () => rej(new Error('backdrop.js 파일이 없어요'));
+        const s = document.createElement('script'); s.src = 'backdrop.js?v=20261117x'; s.onload = res; s.onerror = () => rej(new Error('backdrop.js 파일이 없어요'));
         document.head.appendChild(s);
       });
       const bin = atob(window.BACKDROP_JPG), u8 = new Uint8Array(bin.length);

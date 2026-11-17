@@ -6,14 +6,14 @@
 // ① 구글 Apps Script '웹 앱 URL' (바다 미션과 같은 주소를 써도 돼요)
 //    비워 두면 보내기 없이 혼자 연습하는 모드로 동작해요. 선생님 화면은 예시 데이터를 보여 줘요.
 //    ※ 바다 미션과 같은 주소를 쓰면 기록이 한 시트에 쌓이니, 수업 전에 선생님 화면에서 '기록 지우기'를 눌러 주세요.
-var SERVER_URL = '';
+var SERVER_URL = 'https://script.google.com/macros/s/AKfycbyba_ektDr8XU3H9-n5v0jOh_Kj0iRQwZ3ktAKLw3DLyoMmCew4uCYBcsJRSWWdqZU8Wg/exec';   // 제주 헤리티지 기록 시트
 
 // ② 반 인원 = 번호 버튼 개수
 var CLASS_SIZE = 30;
 
 // ③ 게임판 그림 (유니키트 × 에듀인플랫폼 제주 지도 · A0 118.9×84.1cm 출력 시 가로 11칸 × 세로 8칸, 한 칸 = 10cm → 격자 110×80cm)
 //    (주소 끝에 ?grid 를 붙여 열면 칸 테두리가 빨간 선으로 보여요)
-var BG_IMAGE = 'jeju-map.png?v=20261117t';
+var BG_IMAGE = 'jeju-map.png?v=20261117x';
 var IMG_SIZE = { w: 2000, h: 1415 };                          // 그림 전체 픽셀 크기
 var GRID = { left: 74, top: 34, width: 1851, height: 1346 }; // 격자가 차지하는 영역(픽셀)
 var GRID_COLS = 11;                                            // 가로 칸 수

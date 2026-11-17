@@ -490,3 +490,11 @@ button.ghost{min-height:2.3em; font-size:.92em;}
 #introGo{margin:0;}
 #mission .mt{display:flex; align-items:center; gap:.4em;} #mission .mt .mini{margin-left:auto; font-size:.72em; border:1px solid #d5dde7; color:#334155;}
 #intro{z-index:60;}
+.wzSendNote{margin-top:.5em; font-size:.82em; color:#1e40af; background:#eff6ff; border-radius:8px; padding:.4em .6em;}
+/* 미리보기 길 */
+#pvPath{position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:2; overflow:visible;}
+#pvPath polyline{fill:none; stroke:#2563eb; stroke-width:3; stroke-dasharray:7 6; stroke-linecap:round; stroke-linejoin:round; vector-effect:non-scaling-stroke; opacity:.75;}
+#pvPath text{fill:#dc2626; font-size:5px; font-weight:900; text-anchor:middle; dominant-baseline:central;}
+body.running #pvPath{opacity:.35;}
+.pvX{position:absolute; transform:translate(-50%,-50%); color:#dc2626; font-weight:900; font-size:calc(var(--cell) * .5); z-index:3; pointer-events:none; text-shadow:0 0 3px #fff;}
+body.running .pvX{display:none;}

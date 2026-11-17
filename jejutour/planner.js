@@ -85,7 +85,7 @@ function go(step){
   pickSlot = null;
   if (step === 2) drawCourse();
   if (step === 3){ drawMission(); drawStack(); requestAnimationFrame(() => fitBlocks(['palette']));
-    if (!prog.length && introSeen !== course.join()) showIntro(); }
+    if (!prog.length && introSeen !== course.join()) showIntro(); preview(); }
   if (step !== 3) hideIntro();
   if (step === 4){ drawCard(); drawStack(); }            // 새로고침 뒤 ④에서도 오른쪽 내 코드가 보이게
   drawDots(); drawScore(); save();
@@ -187,7 +187,31 @@ function addBlock(k){                         // 팔레트 블록을 '톡' 누�
   stack.scrollTop = stack.scrollHeight;
 }
 /* 코드가 바뀌면 스탬프는 다시 실행해서 받아요 */
-function changed(){ if (paused){ paused = null; runButtons(); } if (last.stamps.length || last.crashes){ last = { stamps:[], crashes:0 }; drawDots(); drawMission(); } save(); drawScore(); }
+function changed(){ if (paused){ paused = null; runButtons(); } if (last.stamps.length || last.crashes){ last = { stamps:[], crashes:0 }; drawDots(); drawMission(); } save(); drawScore(); preview(); }
+/* 미리보기: 블록이 바뀔 때마다 코드가 끝나는 자리로 오토카를 옮기고 지나갈 길을 점선으로 (스탬프는 ▶ 실행에서만) */
+function preview(){
+  if (running || +document.body.dataset.step !== 3) return;
+  let p = { row:START.row, col:START.col, dir:START.dir, rot:START.dir * 90 }, crash = null;
+  const pts = [[p.row, p.col]];
+  for (const s of expand(prog)){
+    if (s.k === 'cell'){
+      const [dr, dc] = DIRS[p.dir], nr = p.row + dr * s.sign, nc = p.col + dc * s.sign;
+      if (cellType(nr, nc) !== 'land'){ crash = [nr, nc]; break; }
+      p.row = nr; p.col = nc; pts.push([nr, nc]);
+    }
+    if (s.k === 'turn'){ p.dir = (p.dir + s.d + 8) % 4; p.rot += s.d * 90; }
+  }
+  let svg = layer.querySelector('#pvPath');
+  if (!svg){ svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); svg.id = 'pvPath'; svg.setAttribute('viewBox', '0 0 100 100'); svg.setAttribute('preserveAspectRatio', 'none'); layer.prepend(svg); }
+  const xy = ([r, c]) => { const q = cellRect(r, c); return `${q.x.toFixed(2)},${q.y.toFixed(2)}`; };
+  svg.innerHTML = pts.length > 1 ? `<polyline points="${pts.map(xy).join(' ')}"/>` : '';
+  layer.querySelector('.pvX')?.remove();
+  if (crash){ const q = cellRect(crash[0], crash[1]), x = document.createElement('div'); x.className = 'pvX'; x.textContent = '✕';
+    x.style.left = q.x + '%'; x.style.top = q.y + '%'; layer.appendChild(x); }
+  st = p; drawCar(true);
+  $('mapHint').textContent = crash ? '미리보기: 이대로면 바다·한라산에 막혀요 (빨간 ✕) · 블록을 고쳐요'
+    : prog.length ? `미리보기: 오토카가 ${p.row}행 ${p.col}열에서 멈춰요 · ▶ 실행으로 스탬프를 받아요` : HINT[3];
+}
 function removeAt(path){ const { lp, i } = parentOf(path); const list = listAt(prog, lp); return list ? list.splice(i, 1)[0] : null; }
 function drawStack(snapPath = null){
   stack.innerHTML = `<div class="hatRow">${HAT_SVG}</div>` + rowsHTML(prog, '', true) +
@@ -627,15 +651,20 @@ let wiz = { step:1, done:{} };
 function showDone(){
   Sound.win(); Confetti.burst();
   wiz = { step:1, done:{} };
-  if (SERVER) send(true);                 // 결과를 열면 선생님께 먼저 한 번 자동으로 보냄
+  if (SERVER) send(true).then(ok => { wiz.done.sent = ok; if ($('donePop').classList.contains('show')) drawWiz(); });   // 완성하기 = 선생님께 먼저 한 번
   drawWiz();
   $('donePop').classList.add('show');
 }
-function finishWiz(){
+async function finishWiz(){
   $('donePop').classList.remove('show'); drawCard();
   const l = $('left'); l.classList.remove('flash'); void l.offsetWidth; l.classList.add('flash');
-  toast('여행 플래너 미션 완료 · 수고했어요', 'ok');
+  if (!SERVER){ toast('여행 플래너 미션 완료 · 수고했어요', 'ok'); return; }
+  toast('선생님께 보내는 중…');
+  const ok = await sendFinal();                                   // 끝내기 = 채운 계획까지 선생님께
+  toast(ok ? `여행 플래너 미션 완료 · ${me.no}번 계획을 선생님께 보냈어요` : '선생님께 보내지 못했어요 · 인터넷을 확인하고 끝내기를 다시 눌러요', ok ? 'ok' : 'bad');
 }
+/* 보내기가 이미 진행 중이면 끝날 때까지 기다렸다가 최신 내용으로 다시 보냄 */
+async function sendFinal(){ for (let i = 0; i < 20 && sending; i++) await sleep(100); sending = false; return send(true); }
 function drawWiz(){
   const sc = calcScore(prog, last.stamps.length, last.crashes), k = wiz.step, d = wiz.done;
   const rail = WIZ.map((w, i) => `${i ? '<b class="wzLine' + (d[1] ? ' on' : '') + '"></b>' : ''}
@@ -655,7 +684,7 @@ function drawWiz(){
         <div class="wzBox"><b>💾 핑퐁 스크래치 파일</b><small>웹 핑퐁 스크래치에서 불러와요</small>
           <button class="primary" id="wzSb3" style="background:#ffab19;box-shadow:0 4px 0 #d98b00">💾 핑퐁 파일 저장</button>${chk(d.sb3)}</div>
       </div>
-      ${SERVER ? `<button class="primary wzSend" id="wzSend" style="background:#4c97ff;box-shadow:0 4px 0 #2f6fd0">📮 선생님께 보내기</button>${d.sent ? '<i class="wzChk">✓ 보냈어요</i>' : ''}` : ''}`;
+      ${SERVER ? `<div class="wzSendNote">📮 ${d.sent ? '선생님께 보냈어요 ✓' : '선생님께 보내는 중…'} · <b>끝내기</b>를 누르면 채운 계획까지 다시 보내요</div>` : ''}`;
     nav = `<button class="ghost" id="wzPrev">◀ 이전</button><button class="primary" id="wzNext">${d.img && d.sb3 ? '✅ 끝내기' : '끝내기'}</button>`;
   }
   $('doneCard').innerHTML = `<h1>코스 완성</h1>
@@ -674,7 +703,6 @@ function drawWiz(){
   $('wzSee').onclick = showPlan;
   $('wzImg').onclick = async () => { await savePlan(); d.img = true; after(); };
   $('wzSb3').onclick = async () => { await saveSb3(); d.sb3 = true; after(); };
-  if (SERVER) $('wzSend').onclick = async () => { if (await send()){ d.sent = true; drawWiz(); } };
   $('wzPrev').onclick = () => { wiz.step = 1; drawWiz(); };
   $('wzNext').onclick = () => {
     if (!(d.img && d.sb3) && !confirm('아직 저장하지 않은 것이 있어요. 그래도 끝낼까요?')) return;
