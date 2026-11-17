@@ -127,7 +127,8 @@ body.present #right h2{font-size:clamp(18px, 1.6vw, 30px);}
 const board = $('board'), layer = $('layer');
 function updateCellVar(){ board.style.setProperty('--cell', board.clientWidth * cellSize() / 100 + 'px'); }
 const SERVER = (window.SERVER_URL || '').trim();
-const DEMO = !SERVER || location.search.includes('demo');
+const DEMO = location.search.includes('demo');           // 예시 데이터는 주소 끝에 ?demo 를 붙일 때만
+const LOCAL = !SERVER && !DEMO;                           // 주소가 없으면 빈 화면으로 시작
 const N = window.CLASS_SIZE || 30;
 const DATA = {};                                  // 번호 → 기록
 let cur = null, curNo = null, st, playing = false, stopFlag = false, car, pins = [], trail = [];
@@ -334,7 +335,7 @@ function clearView(){
 function demoClear(){
   Object.keys(DATA).forEach(k => delete DATA[k]);
   $('resetBox').classList.remove('show'); clearView(); refreshCards();
-  $('status').textContent = '예시 데이터를 지웠어요 (새로고침하면 다시 보여요)';
+  $('status').textContent = DEMO ? '예시 데이터를 지웠어요 (새로고침하면 다시 보여요)' : '아직 받은 기록이 없어요';
   toast('↺ 초기화했어요');
 }
 
@@ -350,15 +351,17 @@ $('bShow').onclick = () => {                 // 🖥 발표: 번호판을 숨기
 $('bSound').onclick = () => { Sound.unlock(); const on = Sound.toggle(); Voice.set(on); $('bSound').textContent = on ? '🔊' : '🔇'; };
 $('bgImg').onload = $('bgImg').onerror = () => {
   buildBoard(); makeCards(); updateCellVar(); resetRun();
-  $('demoTag').textContent = DEMO ? '예시' : '실시간'; $('demoTag').title = DEMO ? '예시 데이터 (config.js에 주소를 넣으면 실제 기록)' : '';
-  if (DEMO){ demoData(); refreshCards(); $('status').textContent = '예시 데이터 (config.js에 주소를 넣으면 실제 기록)'; }
+  $('demoTag').textContent = DEMO ? '예시' : LOCAL ? '연결 전' : '실시간';
+  $('demoTag').title = DEMO ? '예시 데이터' : LOCAL ? 'config.js에 Apps Script 주소를 넣으면 학생 기록이 들어와요' : '';
+  if (DEMO){ demoData(); refreshCards(); $('status').textContent = '예시 데이터 (주소 끝 ?demo 를 빼면 빈 화면)'; }
+  else if (LOCAL){ refreshCards(); $('status').textContent = '아직 받은 기록이 없어요 · config.js에 주소를 넣으면 학생 기록이 들어와요'; }
   else { load(); setInterval(load, 5000); }
   $('bInit').onclick = () => {
     $('resetMsg').textContent = '';
-    $('resetTxt').textContent = DEMO ? '예시 기록과 화면을 모두 지워요.' : '학생들이 보낸 기록이 모두 지워지고 되돌릴 수 없어요.';
+    $('resetTxt').textContent = DEMO || LOCAL ? '화면에 보이는 기록을 모두 지워요.' : '학생들이 보낸 기록이 모두 지워지고 되돌릴 수 없어요.';
     $('resetBox').classList.add('show');
   };
-  $('resetGo').onclick = DEMO ? demoClear : clearAll;
+  $('resetGo').onclick = DEMO || LOCAL ? demoClear : clearAll;
   $('resetNo').onclick = () => $('resetBox').classList.remove('show');
 };
 $('bgImg').src = BG_IMAGE;
