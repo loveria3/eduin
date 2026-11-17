@@ -436,7 +436,10 @@ const SB3 = (() => {
       });
       return ids[0];
     }
-    const carMove = (cm, dir) => ['PingPongAutoCar_moveRobot', i => ({ DIRECTION: menu('PingPongAutoCar_menu_MOVE_LENGTH_DIRECTION_MENU', 'MOVE_LENGTH_DIRECTION_MENU', dir > 0 ? '1' : '-1', i), INTERVAL: txt(cm) })];
+    // 웹 핑퐁 스크래치의 오토카 블록은 방향(앞쪽/뒤쪽·왼쪽/오른쪽)이 '블록 안 드롭다운 칸(field)'이에요.
+    // (메뉴 블록을 끼우면 무시되고 기본값 앞쪽·왼쪽으로 열려요)
+    const field = (name, val) => i => { blocks[i].fields = { [name]:[val, null] }; };
+    const carMove = (cm, dir) => ['PingPongAutoCar_moveRobot', () => ({ INTERVAL: txt(cm) }), field('DIRECTION', dir > 0 ? '1' : '-1')];
     // 학생이 만든 코드 그대로: 오토카 블록만 (화면 그림은 출발 칸에 놓아 두기만 함)
     const items = [
       ['event_whenflagclicked'],
@@ -447,7 +450,7 @@ const SB3 = (() => {
       list.forEach(b => {
         if (b.t === 'move') out.push(carMove(b.cm, b.dir));
         if (b.t === 'turn') out.push(
-          ['PingPongAutoCar_rotateRobot', i => ({ DIRECTION: menu('PingPongAutoCar_menu_MOVE_WIDTH_DIRECTION_MENU', 'MOVE_WIDTH_DIRECTION_MENU', b.dir === 'L' ? '0' : '1', i), DEGREE: txt(b.deg) })]);
+          ['PingPongAutoCar_rotateRobot', () => ({ DEGREE: txt(b.deg) }), field('DIRECTION', b.dir === 'L' ? '0' : '1')]);
         if (b.t === 'tts') out.push(['text2speech_speakAndWait', () => ({ WORDS: txt(b.text) })]);
         if (b.t === 'say') out.push(['looks_sayforsecs', () => ({ MESSAGE: txt(b.text), SECS: num(2) })]);
         if (b.t === 'wait') out.push(['control_wait', () => ({ DURATION: [1, [5, String(b.sec)]] })]);
@@ -495,7 +498,7 @@ const SB3 = (() => {
       return { bytes:new Uint8Array(await blob.arrayBuffer()), fmt:'png' };
     } catch(e){
       if (!window.BACKDROP_JPG) await new Promise((res, rej) => {
-        const s = document.createElement('script'); s.src = 'backdrop.js?v=20261117k'; s.onload = res; s.onerror = () => rej(new Error('backdrop.js 파일이 없어요'));
+        const s = document.createElement('script'); s.src = 'backdrop.js?v=20261117p'; s.onload = res; s.onerror = () => rej(new Error('backdrop.js 파일이 없어요'));
         document.head.appendChild(s);
       });
       const bin = atob(window.BACKDROP_JPG), u8 = new Uint8Array(bin.length);
@@ -624,7 +627,7 @@ function planSheetHTML(rec){
         <div><b>${esc(s.name)}</b> <i>${esc(CAT_NAME[s.cat] || s.cat)} · ${esc(s.area || '')} · ${it.stay}분 머물기</i>
         <p>${esc(s.intro)}</p><p>🔎 <b>탐험 미션</b> ${esc(s.mission)}</p>
         ${it.say ? `<p class="say">🗣 가이드 안내: “${esc(it.say)}”</p>` : ''}</div></div>`; }
-    return `<div class="pv pv_${it.k}"><span class="tm">${hhmm(it.time)}</span><span class="no">${it.k === 'lunch' ? '🍽' : it.k === 'start' ? '🛫' : '🛬'}</span><div><b>${esc(it.title)}</b> <i>${esc(it.sub)}</i></div></div>`;
+    return `<div class="pv pv_${it.k}"><span class="tm">${hhmm(it.time)}</span><span class="no">${it.k === 'lunch' ? '🍜' : it.k === 'start' ? '🛫' : '🛬'}</span><div><b>${esc(it.title)}</b> <i>${esc(it.sub)}</i></div></div>`;
   }).join('');
   const box = (h, v, ph) => `<div class="pbox"><h4>${h}</h4><p>${v ? esc(v) : `<span class="pph">${ph}</span>`}</p></div>`;
   return `<div class="planSheet" style="--tc:${t.color}">

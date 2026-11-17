@@ -232,8 +232,8 @@ body.planning .spot{cursor:pointer;}
 .planSheet .pv b{font-size:1.05em;} .planSheet .pv i{font-style:normal; font-size:.8em; color:#6b7c90; font-weight:700;}
 .planSheet .pv p{margin:.2em 0 0; font-size:.86em; color:#3e4f63;}
 .planSheet .pv p.say{color:#2b5a9a; font-weight:700;}
-.planSheet .pv.pvSpot{background:#f7fafc; box-shadow:0 0 0 2px #e6edf4 inset; margin:.15em 0;}
-.planSheet .pv.pvSpot.ok{box-shadow:0 0 0 2px #12bd8c inset; background:#f2fcf8;}
+.planSheet .pv.pvSpot{background:#f7fafc; border:2px solid #e6edf4; margin:.15em 0;}   /* 이미지 저장(html2canvas)이 inset 그림자를 색칠해 버려서 테두리로 */
+.planSheet .pv.pvSpot.ok{border-color:#12bd8c; background:#f2fcf8;}
 .planSheet .pv.pvMove{padding:.1em .3em; color:#6b7c90; font-size:.82em;} .planSheet .pv.pvMove b{font-size:1em; color:#41526a;}
 .planSheet .miniMap{width:100%; display:block; border-radius:12px;}
 .planSheet .stats{display:grid; grid-template-columns:repeat(3, 1fr); gap:6px; margin:10px 0;}
