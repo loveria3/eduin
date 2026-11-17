@@ -13,7 +13,7 @@ var CLASS_SIZE = 30;
 
 // ③ 게임판 그림 (유니키트 × 에듀인플랫폼 제주 지도 · A0 118.9×84.1cm 출력 시 가로 11칸 × 세로 8칸, 한 칸 = 10cm → 격자 110×80cm)
 //    (주소 끝에 ?grid 를 붙여 열면 칸 테두리가 빨간 선으로 보여요)
-var BG_IMAGE = 'jeju-map.png?v=20261117p';
+var BG_IMAGE = 'jeju-map.png?v=20261117t';
 var IMG_SIZE = { w: 2000, h: 1415 };                          // 그림 전체 픽셀 크기
 var GRID = { left: 74, top: 34, width: 1851, height: 1346 }; // 격자가 차지하는 영역(픽셀)
 var GRID_COLS = 11;                                            // 가로 칸 수

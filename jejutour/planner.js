@@ -84,7 +84,9 @@ function go(step){
   $('mapHint').textContent = HINT[step];
   pickSlot = null;
   if (step === 2) drawCourse();
-  if (step === 3){ drawMission(); drawStack(); requestAnimationFrame(() => fitBlocks(['palette'])); }
+  if (step === 3){ drawMission(); drawStack(); requestAnimationFrame(() => fitBlocks(['palette']));
+    if (!prog.length && introSeen !== course.join()) showIntro(); }
+  if (step !== 3) hideIntro();
   if (step === 4){ drawCard(); drawStack(); }            // 새로고침 뒤 ④에서도 오른쪽 내 코드가 보이게
   drawDots(); drawScore(); save();
 }
@@ -140,10 +142,36 @@ function openSpot(id){
 }
 
 /* ③ 코딩 */
+/* 코딩 시작 전: 지도 위에 미션 규칙을 크게 */
+let introSeen = '';
+function showIntro(){
+  const dirs = ['위(북쪽)', '오른쪽(동쪽)', '아래(남쪽)', '왼쪽(서쪽)'];
+  $('intro').innerHTML = `<div class="introCard">
+    <div class="iHead">코딩 미션 <small>자율주행 택시로 3곳을 안내해요</small></div>
+    <div class="iFlow">
+      <div><i>1</i><b>이동</b><small>오토카 블록으로<br>장소 칸까지</small></div><span>→</span>
+      <div><i>2</i><b>말하기</b><small>도착한 바로 다음에<br>"여기는 ○○입니다"</small></div><span>→</span>
+      <div class="g"><i>🏅</i><b>스탬프</b><small>둘 다 해야 받아요</small></div>
+    </div>
+    <div class="iSpots">${course.map((id, i) => { const t = SPOT[id]; return `<span><i>${i + 1}</i>${esc(t.key)} <small>${t.row}행 ${t.col}열</small></span>`; }).join('')}</div>
+    <div class="iStart">출발: ${START.name}(${START.row}행 ${START.col}열) · ${dirs[START.dir]}를 보고 출발 · 한 칸 = 10cm</div>
+    <button class="primary" id="introGo">확인했어요 · 코딩 시작</button>
+  </div>`;
+  $('intro').classList.add('show');
+  $('introGo').onclick = () => { introSeen = course.join(); hideIntro(); updateGuide(); };
+  updateGuide();
+}
+function hideIntro(){ $('intro') && $('intro').classList.remove('show'); }
 function drawMission(){
-  $('mission').innerHTML = `<div class="mt">🎯 미션: 3곳에 도착해서 안내 방송하기<br><small>🔊 말하기 또는 💬 말풍선에 <b>"여기는 ○○입니다"</b></small></div>` +
+  $('mission').innerHTML = `<div class="mt">미션: 3곳에서 스탬프 받기 <button class="mini" id="btnIntro">크게 보기</button></div>
+    <div class="rule">
+      <div><i>1</i><b>이동</b><small>오토카 블록으로 장소 칸까지</small></div>
+      <div><i>2</i><b>말하기</b><small>도착한 바로 다음에 "여기는 ○○입니다"</small></div>
+      <div class="r3"><i>🏅</i><b>스탬프</b><small>둘 다 해야 받아요 · 도착만 하면 없어요</small></div>
+    </div>` +
     course.map((id, i) => { const s = SPOT[id], ok = last.stamps.includes(id);
       return `<div class="mRow${ok ? ' ok' : ''}"><span class="st">${ok ? '✓' : i + 1}</span><code>${esc(s.key)}</code><small>${s.row}행 ${s.col}열</small></div>`; }).join('');
+  $('btnIntro').onclick = showIntro;
 }
 function drawPalette(){
   const groups = [['오토카', ['move', 'turn']], ['안내 방송', ['tts', 'say']], ['제어', ['wait', 'rep']]];
@@ -302,6 +330,7 @@ function updateGuide(){
     g && g.classList.add('guide'); return;
   }
   if (running || $('start').classList.contains('show') || document.querySelector('.overlay.show')) return;
+  if ($('intro').classList.contains('show')){ $('introGo').classList.add('guide'); return; }
   const step = +document.body.dataset.step;
   let el = null;
   if (step === 1) el = $('themes');
@@ -330,6 +359,7 @@ function runButtons(){
 }
 async function run(){
   if (running || !prog.length){ if (!prog.length) toast('블록을 먼저 쌓아요!', 'bad'); return; }
+  hideIntro();
   Sound.unlock();
   // 한글 입력이 끝나기 전에 ▶를 눌러도, 칸에 보이는 글자를 그대로 코드에 넣고 시작
   if (document.activeElement && stack.contains(document.activeElement)) document.activeElement.blur();
@@ -341,7 +371,7 @@ async function run(){
   const rows = () => stack.querySelectorAll('.row');
   const key = JSON.stringify(prog);
   const steps = expand(prog);
-  let got = [], crashes = 0, from = 0, finishNow = false;
+  let got = [], crashes = 0, from = 0, finishNow = false; const hinted = new Set();
   if (paused && paused.key === key){            // 이어서
     ({ got, crashes } = paused); from = paused.idx; st = { ...paused.st }; drawCar(false);
     toast('멈춘 자리에서 이어서 달려요');
@@ -362,6 +392,13 @@ async function run(){
         bubble(layer, st.row, st.col, BLOCK_MSG[t], '', 2200); break;
       }
       st.row = nr; st.col = nc; drawCar(true); Sound.ding(1319); await sleep(STEP_MS + 60);
+      const arrived = spotsAt(st.row, st.col).filter(h => course.includes(h.id) && !got.includes(h.id));
+      const nxt = steps.slice(si + 1).find(x => x.k !== 'loop');
+      if (arrived.length && !(nxt && nxt.k === 'speak') && !hinted.has(arrived[0].id)){
+        hinted.add(arrived[0].id);
+        bubble(layer, st.row, st.col, `${arrived[0].key} 도착! 여기서 말하기 블록을 넣어요`, '', 2600);
+        toast(`${arrived[0].key} 칸에 왔어요 · 이 다음에 말하기 블록으로 "여기는 ${arrived[0].key}입니다"를 넣어야 스탬프를 받아요`, 'bad');
+      }
     }
     if (s.k === 'turn'){ st.dir = (st.dir + s.d + 8) % 4; st.rot += s.d * 90; drawCar(true); Sound.ding(1175); await sleep(STEP_MS); }
     if (s.k === 'wait') await sleep(Math.min(3, s.sec) * 1000);
@@ -372,6 +409,10 @@ async function run(){
       here.forEach(h => { if (saysName(s.text, h) && !got.includes(h.id)) got.push(h.id); });
       if (here.length && !here.some(h => saysName(s.text, h)))
         toast(`여기는 ${here.map(h => h.key).join('·')}! 이름을 넣어 안내해요`, 'bad');
+      else if (!here.length){                                       // 장소 칸이 아닌 곳에서 말함
+        const want = course.map(id => SPOT[id]).find(h => saysName(s.text, h));
+        if (want) toast(`아직 ${want.key} 칸이 아니에요 · ${want.key}는 ${want.row}행 ${want.col}열이에요 (지금 ${st.row}행 ${st.col}열)`, 'bad');
+      }
       const fresh = got.filter(id => !before.has(id));
       if (fresh.length){
         const prevT = calcScore(prog, last.stamps.length, last.crashes).total;

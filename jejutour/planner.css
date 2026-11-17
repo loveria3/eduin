@@ -453,3 +453,40 @@ button.ghost{min-height:2.3em; font-size:.92em;}
 #doneCard .wzFields{gap:.3em .6em;}
 #doneCard .wzFields input, #doneCard .wzFields select, #doneCard .wzFields textarea{padding:.28em .5em;}
 #doneCard .wzNav{margin-top:.5em;}
+/* 미션 규칙: 이동 → 말하기 = 스탬프 */
+#mission .rule{display:flex; align-items:stretch; gap:.3em; margin:.35em 0 .3em;}
+#mission .rule > div{flex:1; background:#f8fafc; border:1px solid var(--line); border-radius:8px; padding:.3em .4em; display:flex; flex-direction:column; gap:.1em; min-width:0;}
+#mission .rule > span{align-self:center; color:#94a3b8; font-weight:800;}
+#mission .rule i{font-style:normal; width:1.3em; height:1.3em; border-radius:50%; background:var(--ink); color:#fff; font-size:.72em; display:flex; align-items:center; justify-content:center; font-weight:700;}
+#mission .rule b{font-size:.88em;} #mission .rule small{font-size:.72em; color:var(--muted); font-weight:500; line-height:1.3;}
+#mission .rule small code{font-size:1em; padding:0 .2em; background:#eef2f6; color:#0f172a;}
+#mission .rule .r3{flex:.7; align-items:center; justify-content:center; background:#fff7ed; border-color:#fed7aa;}
+#mission .ruleTip{margin:0 0 .35em; font-size:.76em; color:#9a3412; background:#fff7ed; border-radius:6px; padding:.3em .5em; font-weight:500;}
+#mission .ruleTip b{font-weight:700;}
+#mission .rule{flex-direction:column; gap:.2em;}
+#mission .rule > div{flex-direction:row; align-items:baseline; gap:.4em; flex-wrap:wrap; padding:.25em .45em;}
+#mission .rule i{align-self:center; flex:none;}
+#mission .rule b{flex:none;}
+#mission .rule small{font-size:.76em; flex:1; min-width:8em;}
+#mission .rule .r3 i{background:none; width:auto; font-size:.95em;}
+#mission .rule .r3 small{color:#9a3412;}
+/* 코딩 시작 전 지도 위 미션 카드 */
+#intro{position:absolute; inset:0; z-index:9; display:none; align-items:center; justify-content:center; background:rgba(15,30,50,.32); padding:4%;}
+#intro.show{display:flex;}
+.introCard{background:#fff; border-radius:14px; box-shadow:0 10px 30px rgba(15,30,50,.25); padding:1.1em 1.3em; width:min(100%, 34em);
+  font-size:clamp(13px, 1.05vw, 19px); display:flex; flex-direction:column; gap:.7em; animation:cardFade .25s ease-out;}
+.iHead{font-weight:800; font-size:1.3em;} .iHead small{display:block; font-size:.62em; font-weight:500; color:var(--muted); margin-top:.15em;}
+.iFlow{display:flex; align-items:stretch; gap:.4em;}
+.iFlow > span{align-self:center; color:#94a3b8; font-weight:800; font-size:1.2em;}
+.iFlow > div{flex:1; border:1px solid var(--line); background:#f8fafc; border-radius:10px; padding:.55em .5em; display:flex; flex-direction:column; align-items:center; text-align:center; gap:.2em;}
+.iFlow i{font-style:normal; width:1.6em; height:1.6em; border-radius:50%; background:var(--ink); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:.9em;}
+.iFlow b{font-size:1.1em;} .iFlow small{font-size:.8em; color:var(--muted); line-height:1.35;}
+.iFlow .g{background:#fff7ed; border-color:#fed7aa;} .iFlow .g i{background:none; font-size:1.3em;}
+.iSpots{display:flex; flex-wrap:wrap; gap:.4em;}
+.iSpots span{display:flex; align-items:center; gap:.35em; border:1px solid var(--line); border-radius:999px; padding:.2em .7em .2em .25em; font-weight:700; font-size:.92em;}
+.iSpots i{font-style:normal; width:1.5em; height:1.5em; border-radius:50%; background:var(--point); color:#fff; display:flex; align-items:center; justify-content:center; font-size:.8em;}
+.iSpots small{color:var(--muted); font-weight:500;}
+.iStart{font-size:.82em; color:#475569; background:#f1f5f9; border-radius:8px; padding:.4em .6em;}
+#introGo{margin:0;}
+#mission .mt{display:flex; align-items:center; gap:.4em;} #mission .mt .mini{margin-left:auto; font-size:.72em; border:1px solid #d5dde7; color:#334155;}
+#intro{z-index:60;}
