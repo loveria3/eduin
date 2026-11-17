@@ -246,3 +246,210 @@ body.dragging #stack .cblk .slot{outline-color:rgba(255,171,25,.55); outline-off
 .field textarea:focus, .field select:focus{border-color:#4c97ff;}
 .courseCard .cardTip{margin:.3em 0; font-size:.82em; color:#2b5a9a; font-weight:800; background:#eef6ff; border-radius:10px; padding:.3em .6em;}
 .courseCard .field{margin-top:.45em;}
+
+/* 점수가 쌓일 때 톡 튐 */
+#score .tot.bump{animation:scBump .6s cubic-bezier(.2,1.8,.4,1);}
+#score .tot.minus{animation:scMinus .5s;}
+@keyframes scBump{0%{transform:scale(1);} 40%{transform:scale(1.45); background:#ffb300;} 100%{transform:scale(1);}}
+@keyframes scMinus{0%,100%{transform:none;} 25%{transform:translateX(-4px); background:#e0533d;} 75%{transform:translateX(4px); background:#e0533d;}}
+/* 스탬프 카드: 단계 표시 + 얻은 점수 */
+.stampCard .stStage{display:flex; justify-content:center; gap:.5em; margin-bottom:.2em;}
+.stampCard .stStage i{font-style:normal; width:2em; height:2em; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  background:#eef2f6; color:#9aa7b8; font-weight:900;}
+.stampCard .stStage i.on{background:#fff3d6; box-shadow:0 0 0 2px #ffb300 inset;}
+.stampCard .stGain{display:inline-block; background:#fff3d6; color:#b25b00; border-radius:1em; padding:.2em .9em; font-weight:900; font-size:1.15em;
+  margin:.2em 0; animation:scBump .7s .25s both cubic-bezier(.2,1.8,.4,1);}
+.stampCard .stGain span{color:#5b6b83; font-size:.85em;} .stampCard .stGain b{color:#ff6f00;}
+.stampCard #stOk small{font-weight:700; opacity:.8;}
+
+/* 결과 화면: 1 → 2 → 3 단계 */
+#doneCard{width:min(94vw, 640px) !important; max-height:94vh; overflow:auto;}
+.wzScore{display:flex; align-items:center; gap:.7em; background:#fff8ec; border-radius:14px; padding:.45em .7em; margin:.2em 0 .6em;}
+.wzTot{background:#ff8c1a; color:#fff; border-radius:1em; padding:.15em .7em; font-weight:900; font-size:1.5em; white-space:nowrap;}
+.wzScore div{display:flex; flex-wrap:wrap; gap:.2em .8em; font-weight:800; font-size:.82em; color:#5b6b83; text-align:left;}
+.wzScore em{font-style:normal; color:#ff6f00;}
+.wzRail{display:flex; align-items:center; margin:.2em 0 .7em;}
+.wzLine{flex:1; height:4px; background:#dfe6ee; border-radius:2px; min-width:.6em;}
+.wzLine.on{background:#38b26d;}
+.wzStep{all:unset; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:.2em; font-weight:800; font-size:.8em; color:#8a97a8; white-space:nowrap;}
+.wzStep span{width:2.3em; height:2.3em; border-radius:50%; background:#eef2f6; color:#8a97a8; display:flex; align-items:center; justify-content:center;
+  font-size:1.35em; font-weight:900; transition:.2s;}
+.wzStep.cur{color:#ff6f00;} .wzStep.cur span{background:#ff8c1a; color:#fff; box-shadow:0 0 0 5px #ffe1bf; transform:scale(1.1);}
+.wzStep.ok{color:#2e8b57;} .wzStep.ok span{background:#38b26d; color:#fff;}
+.wzBody{background:#f6f9fc; border-radius:14px; padding:.6em .8em; text-align:left; min-height:9em;}
+.wzHow{margin:0 0 .5em; font-weight:700; color:#40506a;} .wzHow b{color:#ff6f00;}
+.wzFields{display:grid; grid-template-columns:1fr 1fr; gap:.4em .6em;}
+.wzFields .wide{grid-column:1 / -1;}
+.wzFields .field{display:flex; flex-direction:column; gap:.2em; font-weight:800; font-size:.85em; color:#5b6b83;}
+.wzFields input, .wzFields select, .wzFields textarea{font:inherit; font-size:1.05em; font-weight:700; padding:.35em .5em; border:2px solid #dfe6ee; border-radius:10px; background:#fff; color:#24323f;}
+.wzBig{display:flex; flex-direction:column; gap:.5em;} .wzBig button{margin:0; width:100%;}
+.wzNote{background:#eef2f6; color:#6b7a8c; border-radius:10px; padding:.5em .7em; font-weight:800;}
+.wzNav{display:flex; gap:.5em; margin-top:.7em;} .wzNav button{margin:0;} .wzNav .primary{flex:1;}
+@media (max-width:520px){ .wzFields{grid-template-columns:1fr;} .wzStep{font-size:.7em;} }
+.stampCard .stBonus{font-size:.8em; font-weight:800; color:#8a6a2a; margin-top:.1em;}
+/* 단계 버튼: 일반 카드 버튼 모양 덮어쓰기 · 한 화면에 들어가게 */
+#doneCard{padding:16px 22px !important;}
+#doneCard h1{font-size:1.8em !important; margin:0 0 .1em !important;}
+#doneCard .wzStep{min-height:0; padding:0; margin:0; box-shadow:none; background:none; border-radius:0; font-size:.8em; color:#8a97a8; flex:none;}
+#doneCard .wzStep.cur{color:#ff6f00;} #doneCard .wzStep.ok{color:#2e8b57;}
+#doneCard .wzLine{margin:0 .4em 1.4em;}
+#doneCard .wzFields textarea{resize:none;}
+#doneCard .wzNav button{min-height:2.8em;}
+#doneCard .wzNav .ghost{color:#4a5a72;}
+/* 기본 화면에서 제목·버튼 글자가 두 줄로 쪼개지지 않게 */
+body{word-break:keep-all;}
+.panel h2{white-space:nowrap; min-width:0;}
+.panel h2 > *{flex:none;}
+/* ② 저장하고 끝내기: 두 저장을 나란히 */
+.wzSave{display:grid; grid-template-columns:1fr 1fr; gap:.6em;}
+.wzBox{background:#fff; border-radius:14px; padding:.6em; display:flex; flex-direction:column; gap:.35em; text-align:center; box-shadow:0 0 0 2px #e6edf5 inset;}
+.wzBox b{font-size:1em; color:#24323f;} .wzBox small{color:#7a8aa3; font-weight:700; font-size:.78em;}
+#doneCard .wzBox button{margin:0; width:100%; min-height:2.6em;}
+.wzChk{font-style:normal; color:#2e8b57; font-weight:900; font-size:.85em;}
+#doneCard .wzSend{width:100%; margin:.6em 0 0;}
+@media (max-width:520px){ .wzSave{grid-template-columns:1fr;} }
+
+
+/* =====================================================================
+   중학생 톤 다듬기: 차분한 색, 납작한 버튼, 굵기·둥글기 줄이기
+   (스크래치 블록 모양은 웹 핑퐁 스크래치와 같게 그대로 둠)
+   ===================================================================== */
+:root{--bg:#eef2f6; --ink:#1f2a37; --line:#e3e8ef; --muted:#667385; --accent:#0f766e; --accent-d:#0b5c56; --point:#f08a24;}
+html, body{font-family:"Pretendard","Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",sans-serif; letter-spacing:-.01em;}
+.panel{border-radius:14px; box-shadow:0 1px 3px rgba(20,40,60,.08); border:1px solid var(--line);}
+.panel h2{border-bottom:1px solid var(--line); font-weight:800;}
+#board{border-radius:12px; box-shadow:0 2px 10px rgba(20,40,60,.12);}
+#mapHint{font-weight:700; color:#41536a;}
+.pane{background:#f7f9fb;}
+.lead{font-weight:800;} .lead small{font-weight:500; color:var(--muted);}
+
+/* 단계 탭 */
+.steps{border-bottom:1px solid var(--line);}
+.steps span{font-weight:700; border-radius:8px; color:#8693a5; background:#eef2f6;}
+body[data-step="1"] .steps [data-s="1"], body[data-step="2"] .steps [data-s="2"],
+body[data-step="3"] .steps [data-s="3"], body[data-step="4"] .steps [data-s="4"]{background:var(--ink); color:#fff;}
+
+/* 버튼: 3D 그림자 없이 납작하게 */
+button.primary, button.ghost, button.mini{border-radius:10px; font-weight:700;}
+button.primary{background:var(--accent); box-shadow:none !important;}
+button.primary:hover{background:var(--accent-d);}
+button.ghost{background:#eef2f6; color:#334155;}
+.card button{box-shadow:none !important; border-radius:10px; font-weight:700;}
+#buttons button{box-shadow:none; border-radius:10px; font-weight:700;}
+#buttons button:active{transform:translateY(1px); box-shadow:none;}
+#btnRun{background:var(--accent);} #btnStop{background:#c2410c;} #btnStop.restart{background:#2563eb !important;}
+#btnDel{background:#64748b;} #btnClear{background:#94a3b8;} #btnSound{background:#64748b;}
+#btnDone{background:#1d4ed8;}
+.initBtn{background:#f1f5f9 !important; color:#b42318 !important; font-weight:700 !important;}
+.chipBtn{background:#1d4ed8; font-weight:700;}
+.count{background:var(--accent);}
+
+/* 입력칸 */
+.field{font-weight:700;}
+.field input, .field select, #myName{border:1.5px solid #d5dde7; border-radius:8px; font-weight:600;}
+.field input:focus, .field select:focus, #myName:focus{border-color:var(--accent); box-shadow:0 0 0 3px rgba(15,118,110,.12);}
+
+/* 테마 카드: 색 테두리 대신 왼쪽 색 막대 */
+.theme{border:1px solid var(--line); border-left:6px solid var(--tc); border-radius:10px; box-shadow:none; padding:.6em .8em;}
+.theme .ti{font-size:1.5em;}
+.theme b{color:var(--ink); font-weight:800;}
+.theme small{font-weight:500;}
+.theme:hover{background:#f8fafc;}
+
+/* 추천 코스 · 미션 */
+.cItem{border-radius:10px; box-shadow:0 0 0 1px var(--line) inset;}
+.cNum, .spNo{background:var(--ink) !important;}
+.cat{font-weight:700; border-radius:6px;}
+#mission{border-radius:10px; box-shadow:0 0 0 1px #f3d9b8 inset; background:#fffdf9;}
+#mission .mt{font-weight:800;}
+.mRow{font-weight:700;}
+.mRow .st{border:1.5px solid #cbd5e1; color:#64748b;}
+.mRow.ok .st{background:var(--accent);}
+.mRow code{background:#f1f5f9; color:#0f172a; font-weight:800;}
+
+/* 점수줄 */
+#score{font-weight:700; border-top:1px solid var(--line);}
+#score .tot{background:var(--point);}
+
+/* 팝업: 튀어나오는 대신 부드럽게 */
+.card{border-radius:16px; box-shadow:0 10px 30px rgba(15,30,50,.25); animation:cardFade .22s ease-out;}
+@keyframes cardFade{from{transform:translateY(8px); opacity:0;} to{transform:none; opacity:1;}}
+.card h1{color:var(--ink); font-weight:800;}
+.card .msg{color:#1e40af; font-weight:700;}
+.overlay{background:rgba(15,30,50,.45);}
+
+/* 스탬프 · 결과 화면 */
+.stampCard .stp{border-width:3px;}
+.stampCard .stGain{background:#fff4e5; animation:none;}
+.stampCard .stStage i.on{background:#e6f4f1; box-shadow:0 0 0 1.5px var(--accent) inset;}
+#doneCard h1{color:var(--ink) !important;}
+.wzScore{background:#f8fafc; border:1px solid var(--line);}
+.wzTot{background:var(--point);}
+.wzStep.cur span{background:var(--ink) !important; box-shadow:0 0 0 4px #e2e8f0 !important; transform:none !important;}
+#doneCard .wzStep.cur{color:var(--ink) !important;}
+.wzStep.ok span{background:var(--accent) !important;} .wzLine.on{background:var(--accent);}
+.wzBody{background:#f8fafc; border:1px solid var(--line);}
+.wzHow b{color:var(--accent);}
+.wzBox{box-shadow:0 0 0 1px var(--line) inset;}
+.courseCard{box-shadow:0 0 0 1px var(--line) inset; border-radius:12px;}
+#toast{font-weight:700;}
+.steps span i{font-style:normal; font-size:.85em; opacity:.7; margin-right:.35em;}
+/* 지도 위: 오토카 처음 자리로 */
+.mapBtn{position:absolute; right:1.2%; top:1.6%; z-index:8; border:1px solid var(--line); background:rgba(255,255,255,.94); color:var(--ink);
+  font:inherit; font-weight:700; font-size:clamp(12px, .95vw, 17px); padding:.45em .85em; border-radius:9px; cursor:pointer;
+  box-shadow:0 1px 4px rgba(20,40,60,.15); white-space:nowrap;}
+.mapBtn:hover{background:#fff; border-color:#cbd5e1;}
+.mapBtn:active{transform:translateY(1px);}
+body.running .mapBtn{background:#fff7ed; border-color:#fdba74;}
+/* 블록 크기 조금 작게 (팔레트·내 코드) */
+.palette{--bf:calc(clamp(12px, min(1.16vw, 2.07vh), 23px) * var(--fit));}
+#stack{--bf:calc(clamp(11px, min(1.06vw, 1.94vh), 19px) * var(--fit));}
+
+/* 다음에 할 일: 은은하게 깜빡이는 테두리 + '다음' 표시 */
+.guide{outline:3px solid rgba(37,99,235,0); outline-offset:0; animation:guidePulse 1.5s ease-in-out infinite; position:relative;}
+@keyframes guidePulse{0%,100%{outline-color:rgba(37,99,235,0); outline-offset:0;} 50%{outline-color:rgba(37,99,235,.6); outline-offset:4px;}}
+#themes.guide{border-radius:12px;}
+button.guide::after{content:"다음"; position:absolute; top:-.75em; right:-.4em; background:#2563eb; color:#fff; font-size:.62em; font-weight:700;
+  padding:.1em .5em; border-radius:6px; line-height:1.5; pointer-events:none; animation:guideTag 1.5s ease-in-out infinite;}
+@keyframes guideTag{0%,100%{transform:translateY(0);} 50%{transform:translateY(-3px);}}
+#palette .blk.guide{outline:none; animation:guideBlk 1.5s ease-in-out infinite;}
+@keyframes guideBlk{0%,100%{transform:none;} 50%{transform:translateX(5px);}}
+body.running .guide{animation:none; outline-color:transparent;}
+@media (prefers-reduced-motion: reduce){ .guide, .guide::after{animation:none !important; outline-color:rgba(37,99,235,.5) !important;} }
+/* 1단계: 테마 카드가 위에서부터 차례로 살짝 빛남 */
+#themes.guide{outline:none; animation:none;}
+#themes.guide .theme{animation:guideCard 2.4s ease-in-out infinite;}
+#themes.guide .theme:nth-child(2){animation-delay:.25s;} #themes.guide .theme:nth-child(3){animation-delay:.5s;}
+#themes.guide .theme:nth-child(4){animation-delay:.75s;} #themes.guide .theme:nth-child(5){animation-delay:1s;}
+@keyframes guideCard{0%,60%,100%{box-shadow:none; transform:none;} 25%{box-shadow:0 0 0 2px rgba(37,99,235,.55); transform:translateX(3px);}}
+
+/* 고르기 칩 */
+.chips{display:flex; flex-wrap:wrap; gap:.3em; margin-top:.1em;}
+.chip{border:1px solid #d5dde7; background:#fff; color:#334155; font:inherit; font-size:.88em; font-weight:600; padding:.28em .65em;
+  border-radius:999px; cursor:pointer; line-height:1.3; min-height:0 !important; margin:0 !important; box-shadow:none !important;}
+.chip:hover{border-color:#94a3b8;}
+.chip.on{background:#1f2a37; border-color:#1f2a37; color:#fff;}
+.field small, .wzFields .field small{font-weight:500; color:var(--muted); font-size:.85em; margin-left:.3em;}
+.wzFields .field.wide > .chips{margin-bottom:.1em;}
+
+/* 버튼 크기: 너무 크지 않게 */
+button.primary{min-height:2.5em; font-size:.95em; padding:.3em 1em;}
+button.ghost{min-height:2.3em; font-size:.92em;}
+.card button{min-height:44px; font-size:.95em; padding:.3em 1em;}
+#doneCard .wzNav button, #doneCard .wzBox button{min-height:2.4em;}
+#buttons{gap:6px; padding:8px;}
+#buttons button{min-height:40px; font-size:clamp(13px, min(1vw, 1.9vh), 18px);}
+#buttons .big{font-size:1.15em;}
+#btnStart{min-height:46px;}
+.mapBtn{font-size:clamp(11px, .85vw, 15px); padding:.38em .75em;}
+.card .chip, #card .chip{color:#334155; background:#fff; font-size:.85em; font-weight:600; padding:.28em .65em; border-radius:999px; min-height:0;}
+.card .chip.on, #card .chip.on{background:#1f2a37; color:#fff;}
+/* 결과 화면을 한 화면에 */
+#doneCard h1{font-size:1.5em !important;}
+#doneCard .wzScore{margin:.1em 0 .4em; padding:.35em .6em;}
+#doneCard .wzRail{margin:.1em 0 .4em;}
+#doneCard .wzBody{padding:.5em .7em;}
+#doneCard .wzHow{margin-bottom:.35em;}
+#doneCard .wzFields{gap:.3em .6em;}
+#doneCard .wzFields input, #doneCard .wzFields select, #doneCard .wzFields textarea{padding:.28em .5em;}
+#doneCard .wzNav{margin-top:.5em;}

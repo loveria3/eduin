@@ -13,7 +13,7 @@ var CLASS_SIZE = 30;
 
 // ③ 게임판 그림 (유니키트 × 에듀인플랫폼 제주 지도 · A0 118.9×84.1cm 출력 시 가로 11칸 × 세로 8칸, 한 칸 = 10cm → 격자 110×80cm)
 //    (주소 끝에 ?grid 를 붙여 열면 칸 테두리가 빨간 선으로 보여요)
-var BG_IMAGE = 'jeju-map.png?v=20261115e';
+var BG_IMAGE = 'jeju-map.png?v=20261117k';
 var IMG_SIZE = { w: 2000, h: 1415 };                          // 그림 전체 픽셀 크기
 var GRID = { left: 74, top: 34, width: 1851, height: 1346 }; // 격자가 차지하는 영역(픽셀)
 var GRID_COLS = 11;                                            // 가로 칸 수
@@ -33,7 +33,7 @@ var MAP = [
   'oooooMooooo',   // 4행  (6열 = 한라산 그림)
   'oooooooooo~',   // 5행
   'ooooooooo~~',   // 6행
-  '~o~~o~~~~~~',   // 7행  (2열 = 가파도 쪽)
+  '~o~~~~~~~~~',   // 7행  (2열 = 가파도 쪽 · 5열은 칸 전체가 바다)
   '~o~~~~~~~~~',   // 8행  (2열 = 마라도)
 ];
 
@@ -59,17 +59,17 @@ var MAP_POINTS = [
 ];
 
 // ⑤ 출발점 · dir: 0 위(북), 1 오른쪽(동), 2 아래(남), 3 왼쪽(서)
-var START = { row: 3, col: 5, dir: 1, name: '제주국제공항' };   // 공항은 2·3행 경계 → 땅 위인 3행 5열에서 출발
+var START = { row: 3, col: 5, dir: 2, name: '제주국제공항' };   // 공항은 2·3행 경계 → 땅 위인 3행 5열에서 아래(남쪽·서귀포 쪽)를 보고 출발
 
 // ⑥ 헤리티지 장소 100곳은 heritage.js 에 있어요 (tools/make_heritage.py 로 만듦)
 
 // ⑦ 여행 테마 (heritage.js 의 theme 글자와 짝)
 var THEMES = {
-  H: { name: '역사 탐험',   icon: '🏯', color: '#e05252', desc: '성·향교·옛 유적을 따라가는 시간 여행' },
-  V: { name: '화산과 자연', icon: '🌋', color: '#f08c1a', desc: '오름·폭포·숲, 화산섬 제주의 자연' },
-  S: { name: '바다와 해녀', icon: '🌊', color: '#2f7fe0', desc: '해녀·해안·포구, 바다와 함께 산 제주' },
-  M: { name: '신화와 전설', icon: '🐉', color: '#9b5de5', desc: '설문대할망·삼성혈, 신들의 섬 제주' },
-  A: { name: '예술과 힐링', icon: '🎨', color: '#16a37a', desc: '미술관·숲길·꽃마을에서 쉬어 가기' },
+  H: { name: '역사 탐험',   icon: '🏯', color: '#c4473f', desc: '성·향교·옛 유적을 따라가는 시간 여행' },
+  V: { name: '화산과 자연', icon: '🌋', color: '#d9731a', desc: '오름·폭포·숲, 화산섬 제주의 자연' },
+  S: { name: '바다와 해녀', icon: '🌊', color: '#2563c9', desc: '해녀·해안·포구, 바다와 함께 산 제주' },
+  M: { name: '신화와 전설', icon: '🐉', color: '#7c4dcc', desc: '설문대할망·삼성혈, 신들의 섬 제주' },
+  A: { name: '예술과 힐링', icon: '🎨', color: '#0f8a68', desc: '미술관·숲길·꽃마을에서 쉬어 가기' },
 };
 var COURSE_SIZE = 3;        // 미션 장소 수 (1일차 코스)
 

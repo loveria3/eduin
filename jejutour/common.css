@@ -246,3 +246,5 @@ body.planning .spot{cursor:pointer;}
 .planPop .card{width:min(96vw, 980px) !important; max-height:94vh; overflow:auto; padding:14px !important; background:#eef3f8 !important;}
 .planPop .pbtns{display:flex; gap:8px; margin-top:10px;} .planPop .pbtns button{flex:1; margin:0;}
 @media (max-width:760px){ .planSheet .pgrid{grid-template-columns:1fr;} }
+.planSheet .ptags .sy{background:#eef2ff; color:#3730a3;}
+.planSheet .pav{border-color:#bfdbfe; background:#f5f9ff;} .planSheet .pav h4{color:#1d4ed8;} .planSheet .pav b{color:#1e3a8a;}

@@ -4,10 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>선생님 화면 - 제주 헤리티지 택시</title>
-<script src="config.js?v=20261115e"></script>
-<script src="heritage.js?v=20261115e"></script>
-<link rel="stylesheet" href="common.css?v=20261115e">
-<link rel="stylesheet" href="planner.css?v=20261115e">
+<script src="config.js?v=20261117k"></script>
+<script src="heritage.js?v=20261117k"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="common.css?v=20261117k">
+<link rel="stylesheet" href="planner.css?v=20261117k">
 <style>
 #nums{flex:1; min-height:0; display:grid; grid-template-columns:repeat(5, 1fr); grid-auto-rows:minmax(0,1fr); gap:6px; padding:8px; background:#f9fafc;}
 .num-card{border:0; border-radius:12px; background:#fff; font:inherit; font-weight:900; cursor:pointer; padding:2px; min-width:0; min-height:0;
@@ -23,7 +24,7 @@
 #codeList{display:flex; flex-direction:column; gap:0; --bf:calc(clamp(12px, min(1.1vw, 2vh), 20px));}
 #codeList .row{margin-top:calc(var(--bf) * -.5);} #codeList .row .blk{display:block; width:max-content;} #codeList .slot > .row:first-child{margin-top:0;} #codeList .row.now .blk{filter:drop-shadow(2.5px 0 0 #ffe600) drop-shadow(-2.5px 0 0 #ffe600) drop-shadow(0 2.5px 0 #ffe600) drop-shadow(0 -2.5px 0 #ffe600);}
 #ctrl{display:flex; gap:6px; padding:8px; border-top:2px solid #eef2f6; flex-wrap:wrap;}
-#ctrl button{flex:1; min-height:46px; border:0; border-radius:12px; font:inherit; font-weight:900; color:#fff; cursor:pointer;}
+#ctrl button{flex:1; min-height:38px; border:0; border-radius:12px; font:inherit; font-weight:900; color:#fff; cursor:pointer;}
 #ctrl button:disabled{background:#c3cad4 !important; cursor:default;}
 #bPlay{background:#12bd8c;} #bReset{background:#ff8c1a;} #bShow{background:#4c97ff;} #bSound{background:#9966ff; flex:.5 !important;}
 #trail{position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:3;}
@@ -32,8 +33,64 @@
 #show .card{width:min(97vw, 1300px) !important;}
 #resetBox .card{text-align:center;}
 #left h2{display:flex; align-items:center; gap:.4em;}
+/* 기본 화면에서 글자가 두 줄로 쪼개지지 않게 */
+body{word-break:keep-all;}
+#left h2, #right h2{white-space:nowrap; min-width:0; font-size:clamp(15px, 1.35vw, 24px); gap:.35em;}
+#left h2 .initBtn{font-size:.62em; padding:.25em .6em;} .demoTag{font-size:.55em !important;}
+.demoTag{white-space:nowrap; flex:none;}
+.num-card .nn{white-space:nowrap; letter-spacing:-.04em; font-size:clamp(11px, 1.05vw, 1.05em);}
+#ctrl{gap:6px;}
+#ctrl button{white-space:nowrap; padding:0 .25em; font-size:clamp(11px, .95vw, 1em); min-width:0;}
+#ctrl #bSound{flex:none; width:2.6em;}
+.legend{word-break:keep-all;}
 .initBtn{margin-left:auto; border:0; border-radius:1em; padding:.25em .8em; background:#ffe1dc; color:#d23c28; font:inherit; font-weight:900; font-size:.75em; cursor:pointer; flex:none;}
 .initBtn:active{transform:scale(.94); background:#ffcfc7;}
+
+/* 지도 옆 여행 계획 카드 */
+.tabs{display:flex; gap:4px; position:sticky; top:-.7em; z-index:2; background:#f9fafc; padding:.2em 0;}
+.tab{flex:1; border:0; border-radius:10px; padding:.4em; font:inherit; font-weight:900; font-size:.85em; background:#e8eef5; color:#5b6b83; cursor:pointer;}
+.tab.on{background:#ff8c1a; color:#fff;}
+.sidePlan{background:#fff; border-radius:16px; padding:.7em .8em; box-shadow:0 0 0 3px #ffd59a inset; display:flex; flex-direction:column; gap:.45em;}
+.sidePlan h3{margin:0; font-size:1.2em; color:#24323f;}
+.spTags{display:flex; flex-wrap:wrap; gap:.3em;} .spTags .cat{font-size:.78em;}
+.spIntro{font-weight:800; color:#40506a; font-size:.88em;}
+.spTl{display:flex; flex-direction:column; gap:.3em;}
+.spEtc{font-weight:800; color:#5b6b83; font-size:.82em;}
+.spMove{font-size:.75em; color:#8a97a8; font-weight:700; padding-left:1.1em; border-left:3px dashed #ffb3cc; margin-left:.7em;}
+.spSpot{border-radius:12px; background:#f6f9fc; padding:.45em .55em; box-shadow:0 0 0 2px #e3eaf2 inset; transition:.3s;}
+.spSpot.ok{background:#eafaf1; box-shadow:0 0 0 2px #38b26d inset;}
+.spSpot.now{animation:spNow .9s ease-in-out 2;}
+@keyframes spNow{50%{transform:scale(1.03); box-shadow:0 0 0 4px #ffe600 inset;}}
+.spHead{display:flex; align-items:center; gap:.4em; flex-wrap:wrap;}
+.spHead b{font-size:.98em;} .spHead small{color:#7a8aa3; font-weight:700; font-size:.75em; margin-left:auto;}
+.spNo{width:1.6em; height:1.6em; border-radius:50%; background:#ff8c1a; color:#fff; font-weight:900; display:flex; align-items:center; justify-content:center; flex:none; font-size:.85em;}
+.spSpot.ok .spNo{background:#38b26d;}
+.spLine{font-size:.8em; font-weight:700; color:#5b6b83; margin-top:.2em;} .spLine.say{color:#1976d2;}
+.spStat{display:flex; flex-wrap:wrap; gap:.3em .7em; align-items:center; font-size:.8em; font-weight:800; color:#5b6b83; border-top:2px dashed #eef2f6; padding-top:.4em;}
+.spStat b{color:#24323f;} .spSc{margin-left:auto; background:#ff8c1a; color:#fff; border-radius:1em; padding:.1em .6em; font-size:1.15em;}
+.spTags .sy{background:#eef2ff; color:#3730a3;} .spBox.av{background:#f5f9ff; color:#1e3a8a; box-shadow:0 0 0 1px #bfdbfe inset;}
+.spBox{background:#fff8ec; border-radius:10px; padding:.4em .55em; font-size:.8em; font-weight:700; color:#6b5a3a;} .spBox.tip{background:#eef6ff; color:#2b5a9a;}
+.spBig{border:0; border-radius:10px; padding:.45em; font:inherit; font-weight:900; font-size:.82em; background:#eef2f6; color:#4a5a72; cursor:pointer;}
+/* 지도를 조금 줄이고 오른쪽 설명 칸을 넓게 */
+#app{grid-template-columns:minmax(0,.85fr) auto minmax(0,1.35fr);}
+#board{height:min(calc(100dvh - 60px), 36vw);}
+/* 🖥 발표: 번호판 숨기고 지도 + 큰 카드 */
+body.present #left{display:none;}
+body.present #app{grid-template-columns:auto minmax(0,1fr); grid-template-areas:"board right";}
+body.present #board{height:min(calc(100dvh - 60px), 38vw);}
+body.present #info{font-size:clamp(15px, 1.25vw, 24px);}
+body.present #right h2{font-size:clamp(18px, 1.6vw, 30px);}
+
+/* 중학생 톤 */
+.tab{font-weight:700; border-radius:8px;} .tab.on{background:var(--ink);}
+.sidePlan{box-shadow:0 0 0 1px var(--line) inset; border-radius:12px;}
+.spSpot{box-shadow:0 0 0 1px var(--line) inset;} .spSpot.ok{box-shadow:0 0 0 1.5px var(--accent) inset; background:#eef8f6;}
+.spSpot.ok .spNo{background:var(--accent) !important;}
+#bPlay{background:var(--accent);} #bReset{background:#64748b;} #bShow{background:#1d4ed8;} #bSound{background:#94a3b8;}
+#ctrl button{border-radius:10px; font-weight:700;}
+.num-card{border-radius:10px; box-shadow:0 0 0 1px var(--line) inset; font-weight:800;}
+.num-card.sel{background:#1d4ed8; box-shadow:0 0 0 3px #fbbf24;}
+.demoTag{background:var(--point);}
 </style>
 </head>
 <body data-step="3">
@@ -41,7 +98,7 @@
   <section class="panel" id="left">
     <h2>👩‍🏫 우리 반 <span class="demoTag" id="demoTag"></span><button id="bInit" class="initBtn" title="화면과 기록을 처음 상태로">↺ 초기화</button></h2>
     <div id="nums"></div>
-    <div class="legend">번호를 누르면 여행 계획서가 나와요 · 흐린 번호는 아직 안 보냈어요<br><span id="status"></span></div>
+    <div class="legend">번호를 누르면 오른쪽에 여행 계획이 나와요 · 흐린 번호는 아직 안 보냈어요<br><span id="status"></span></div>
   </section>
 
   <div id="boardWrap">
@@ -54,7 +111,7 @@
     <div id="info"><div class="insertHint">👈 번호를 누르세요</div></div>
     <div id="ctrl">
       <button id="bPlay" disabled>▶ 재생</button><button id="bReset" disabled>↺ 처음</button>
-      <button id="bShow" disabled>🖥 발표 화면</button><button id="bSound">🔊</button>
+      <button id="bShow" disabled title="발표 화면">🖥 발표</button><button id="bSound">🔊</button>
     </div>
   </section>
 </div>
@@ -65,7 +122,7 @@
 <div id="toast"></div>
 <canvas id="confetti"></canvas>
 
-<script src="common.js?v=20261115e"></script>
+<script src="common.js?v=20261117k"></script>
 <script>
 const board = $('board'), layer = $('layer');
 function updateCellVar(){ board.style.setProperty('--cell', board.clientWidth * cellSize() / 100 + 'px'); }
@@ -86,7 +143,8 @@ function demoData(){
     const st = k % 4 === 3 ? s.slice(0, 2) : s.slice();
     const sc = calcScore(p, st.length, 0).total;
     DATA[no] = { no, th, s, cn:THEMES[th].name + ' 코스', tg:['가족','친구','외국인 관광객'][k % 3], ln:'제주의 ' + THEMES[th].name + '을(를) 한 번에!', p, st, sc,
-      se:['봄','여름','가을','겨울'][k % 4], why:k % 2 ? '' : '하루 만에 ' + THEMES[th].name + ' 명소 세 곳을 알차게 둘러볼 수 있어요.', tip:k % 3 ? '편한 운동화와 물을 챙겨요' : '' };
+      se:['봄','여름','가을','겨울'][k % 4], why:k % 2 ? '' : '하루 만에 ' + THEMES[th].name + ' 명소 세 곳을 알차게 둘러볼 수 있어요.', tip:k % 3 ? '편한 운동화와 물을 챙겨요' : '',
+      sy:[STYLE_OPTS[k % 6], STYLE_OPTS[(k + 2) % 6]].slice(0, k % 3 ? 2 : 1), av:k % 4 ? Object.keys(AV_OPTS)[k % 5] : '' };
   });
 }
 
@@ -148,24 +206,55 @@ function select(no){
   $('nums').querySelectorAll('.num-card').forEach(c => c.classList.toggle('sel', +c.dataset.no === no));
   $('who2').textContent = `📜 ${no}번 ${d.nm || ''}`;
   const t = THEMES[d.th], sc = calcScore(d.p, d.st.length, 0);
-  $('info').innerHTML = `<div class="courseCard">
-      <h3>${esc(d.cn || t.name + ' 코스')}</h3>
-      <div><span class="cat" style="background:${t.color};color:#fff">${t.icon} ${t.name}</span><span class="cat">추천: ${esc(d.tg || '-')}</span></div>
-      ${d.ln ? `<div>💬 ${esc(d.ln)}</div>` : ''}
-      ${d.s.map((id, i) => `<div class="mRow${d.st.includes(id) ? ' ok' : ''}"><span class="st">${d.st.includes(id) ? '✓' : i + 1}</span>${esc(SPOT[id].name)}</div>`).join('')}
-      <div class="sc"><span>스탬프 ${d.st.length}/3</span><span>블록 ${countBlocks(d.p)}개</span><span>반복 ${(() => { let n = 0; walk(d.p, b => { if (b.t === 'rep') n++; }); return n; })()}개</span><b>${d.sc ?? sc.total}점</b></div>
-    </div>
-    <div id="codeList">${HAT_SVG}${rowsHTML(d.p, '', false)}</div>`;
+  $('info').innerHTML = `<div class="tabs"><button class="tab on" data-tab="plan">📜 여행 계획</button><button class="tab" data-tab="code">🧩 코드</button></div>
+    <div id="tabPlan">${sidePlanHTML(d)}</div>
+    <div id="tabCode" hidden><div id="codeList">${HAT_SVG}${rowsHTML(d.p, '', false)}</div></div>`;
+  $('info').querySelectorAll('.tab').forEach(b => b.onclick = () => setTab(b.dataset.tab));
+  $('spBig').onclick = showCard;
   ['bPlay', 'bReset', 'bShow'].forEach(id => $(id).disabled = false);
   resetRun(); drawPins([]);
   $('mapHint').textContent = `${no}번 ${d.nm || ''} · ${t.icon} ${t.name} · ▶ 재생을 눌러요`;
-  showCard();                                   // 번호를 누르면 여행 계획서부터
+}
+function setTab(k){
+  $('info').querySelectorAll('.tab').forEach(b => b.classList.toggle('on', b.dataset.tab === k));
+  $('tabPlan').hidden = k !== 'plan'; $('tabCode').hidden = k !== 'code';
+}
+/* 지도 옆 여행 계획 카드: 재생하면 도착한 곳이 차례로 초록 ✓ */
+function sidePlanHTML(d){
+  const t = THEMES[d.th], P = makePlan(d), sc = d.sc ?? calcScore(d.p, d.st.length, 0).total;
+  const tags = [`<span class="cat" style="background:${t.color};color:#fff">${t.icon} ${t.name}</span>`,
+    d.tg ? `<span class="cat">👥 ${esc(d.tg)}</span>` : '', d.se ? `<span class="cat">🗓 ${esc(d.se)}</span>` : '', ...(d.sy || []).map(v => `<span class="cat sy">${esc(v)}</span>`)].join('');
+  const rows = P.items.map(it => {
+    if (it.k === 'move') return `<div class="spMove">🚕 약 ${it.min}분 · ${it.km}km</div>`;
+    if (it.k === 'spot'){ const s = it.s;
+      return `<div class="spSpot" data-id="${s.id}"><div class="spHead"><span class="spNo">${it.n}</span><b>${esc(s.name)}</b><small>${hhmm(it.time)} 도착 · ${it.stay}분</small></div>
+        <div class="spLine">🔎 ${esc(s.mission)}</div>${it.say ? `<div class="spLine say">🗣 "${esc(it.say)}"</div>` : ''}</div>`; }
+    if (it.k === 'lunch') return `<div class="spEtc">🍜 ${hhmm(it.time)} 점심 · 쉬는 시간</div>`;
+    return `<div class="spEtc">${it.k === 'start' ? '✈️' : '🏁'} ${hhmm(it.time)} ${esc(it.title)}</div>`;
+  }).join('');
+  return `<div class="sidePlan">
+    <h3>${esc(d.cn || t.name + ' 코스')}</h3>
+    <div class="spTags">${tags}</div>
+    <div class="spIntro">💬 ${esc(d.ln || THEME_DESC[d.th] || '')}</div>
+    <div class="spTl">${rows}</div>
+    <div class="spStat"><span>📏 <b>${P.km}</b>km</span><span>⏱ <b>${hhmm(9 * 60)}~${hhmm(P.end)}</b></span><span>🧱 <b>${P.blocks}</b>블록</span><span class="spSc">${sc}점</span></div>
+    ${d.av ? `<div class="spBox av">🚕 <b>자율주행 포인트</b> ${esc(d.av)} · ${esc(AV_OPTS[d.av] || '')}</div>` : ''}
+    ${d.why ? `<div class="spBox">💡 <b>추천 이유</b> ${esc(d.why)}</div>` : ''}
+    ${d.tip ? `<div class="spBox tip">🎒 <b>준비물·팁</b> ${esc(d.tip)}</div>` : ''}
+    <button class="spBig" id="spBig">📄 여행 계획서 크게 보기</button>
+  </div>`;
+}
+function markSide(got, nowId){
+  $('info').querySelectorAll('.spSpot').forEach(el => {
+    const id = +el.dataset.id; el.classList.toggle('ok', got.includes(id)); el.classList.toggle('now', id === nowId);
+    el.querySelector('.spNo').textContent = got.includes(id) ? '✓' : cur.s.indexOf(id) + 1;
+  });
 }
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 async function play(){
   if (!cur || playing) return;
-  resetRun(); await sleep(300); stopFlag = false; playing = true; $('bPlay').textContent = '⏸ 멈춤';
+  resetRun(); markSide([], null); await sleep(300); stopFlag = false; playing = true; $('bPlay').textContent = '⏸ 멈춤';
   const d = cur, got = [];
   for (const s of expand(d.p)){
     if (stopFlag || d !== cur) break;
@@ -184,6 +273,8 @@ async function play(){
       await (s.voice ? Voice.speak(s.text) : sleep(1600));
       spotsAt(st.row, st.col).forEach(h => { if (d.s.includes(h.id) && saysName(s.text, h) && !got.includes(h.id)){ got.push(h.id); Sound.ding(1568); } });
       drawPins(got);
+      const nowEl = got.length && $('info').querySelector(`.spSpot[data-id="${got[got.length - 1]}"]`);
+      markSide(got, got[got.length - 1]); nowEl && nowEl.scrollIntoView({ behavior:'smooth', block:'nearest' });
     }
   }
   playing = false; $('bPlay').textContent = '▶ 다시 재생';
@@ -250,11 +341,16 @@ function demoClear(){
 /* ---------- 시작 ---------- */
 $('bPlay').onclick = () => { if (playing){ stopFlag = true; Voice.stop(); } else play(); };
 $('bReset').onclick = () => { resetRun(); playing = false; $('bPlay').textContent = '▶ 재생'; };
-$('bShow').onclick = showCard;
+$('bShow').onclick = () => {                 // 🖥 발표: 번호판을 숨기고 지도 + 큰 계획 카드
+  const on = document.body.classList.toggle('present');
+  $('bShow').textContent = on ? '↩ 번호판' : '🖥 발표';
+  if (on && $('tabPlan')) setTab('plan');
+  requestAnimationFrame(updateCellVar);
+};
 $('bSound').onclick = () => { Sound.unlock(); const on = Sound.toggle(); Voice.set(on); $('bSound').textContent = on ? '🔊' : '🔇'; };
 $('bgImg').onload = $('bgImg').onerror = () => {
   buildBoard(); makeCards(); updateCellVar(); resetRun();
-  $('demoTag').textContent = DEMO ? '예시 데이터' : '실시간';
+  $('demoTag').textContent = DEMO ? '예시' : '실시간'; $('demoTag').title = DEMO ? '예시 데이터 (config.js에 주소를 넣으면 실제 기록)' : '';
   if (DEMO){ demoData(); refreshCards(); $('status').textContent = '예시 데이터 (config.js에 주소를 넣으면 실제 기록)'; }
   else { load(); setInterval(load, 5000); }
   $('bInit').onclick = () => {

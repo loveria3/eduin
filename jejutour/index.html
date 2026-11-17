@@ -4,18 +4,19 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>제주 헤리티지 자율주행 택시</title>
-<script src="config.js?v=20261115e"></script>
-<script src="heritage.js?v=20261115e"></script>
-<link rel="stylesheet" href="common.css?v=20261115e">
-<link rel="stylesheet" href="planner.css?v=20261115e">
+<script src="config.js?v=20261117k"></script>
+<script src="heritage.js?v=20261117k"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="common.css?v=20261117k">
+<link rel="stylesheet" href="planner.css?v=20261117k">
 </head>
 <body data-step="0" class="resizable">
 <div id="app">
   <!-- 왼쪽: 단계별 안내 -->
   <section class="panel" id="left">
-    <h2><span id="leftTitle">🧭 여행 플래너</span><button id="who" class="chipBtn" hidden></button><button id="btnInit" class="initBtn" title="테마·코스·코드를 지우고 처음부터">↺ 초기화</button></h2>
-    <div class="sizeCtl">🔍 코딩 칸 크기 <button id="zOut" title="작게">−</button><span class="lvl" id="zLvl">보통</span><button id="zIn" title="크게">＋</button></div>
-    <div class="steps"><span data-s="1">① 테마</span><span data-s="2">② 코스</span><span data-s="3">③ 코딩</span><span data-s="4">④ 완성</span></div>
+    <h2><span id="leftTitle">여행 플래너</span><button id="who" class="chipBtn" hidden></button><button id="btnInit" class="initBtn" title="테마·코스·코드를 지우고 처음부터">↺ 초기화</button></h2>
+    <div class="sizeCtl">코딩 칸 크기 <button id="zOut" title="작게">−</button><span class="lvl" id="zLvl">보통</span><button id="zIn" title="크게">＋</button></div>
+    <div class="steps"><span data-s="1"><i>1</i>테마</span><span data-s="2"><i>2</i>코스</span><span data-s="3"><i>3</i>코딩</span><span data-s="4"><i>4</i>완성</span></div>
 
     <div class="pane" id="p1">
       <p class="lead">어떤 여행을 하고 싶나요?<br><small>테마를 고르면 헤리티지 <b>3곳</b>을 추천해 줘요</small></p>
@@ -25,9 +26,9 @@
     <div class="pane" id="p2">
       <p class="lead"><span id="thBadge"></span> 추천 코스<br><small>마음에 안 들면 <b>바꾸기</b> → 지도에서 다른 곳을 눌러요</small></p>
       <div id="courseList"></div>
-      <button class="ghost" id="btnReroll">🔄 다른 코스 추천받기</button>
+      <button class="ghost" id="btnReroll">다른 코스 추천받기</button>
       <label class="field">코스 이름<input id="courseName" maxlength="20" placeholder="예) 시간 여행 역사 코스"></label>
-      <button class="primary" id="btnToCode">🚗 코딩하러 가기</button>
+      <button class="primary" id="btnToCode">코딩하러 가기 →</button>
     </div>
 
     <div class="pane" id="p3">
@@ -46,6 +47,7 @@
     <div id="board">
       <img id="bgImg" alt="제주 지도">
       <div id="layer"></div>
+      <button id="btnCar" class="mapBtn" title="오토카를 출발 칸(공항)으로 옮겨요">↺ 오토카 처음 자리로</button>
     </div>
     <div id="mapHint"></div>
   </div>
@@ -53,7 +55,7 @@
   <div class="handle" id="h2" title="끌어서 크기 조절"></div>
   <!-- 오른쪽: 내 코드 -->
   <section class="panel" id="right">
-    <h2>📜 내 코드 <span class="count" id="count">0개</span></h2>
+    <h2>내 코드 <span class="count" id="count">0개</span></h2>
     <div class="workspace" id="stack"></div>
     <div id="score"></div>
     <div id="buttons">
@@ -62,7 +64,7 @@
       <button id="btnDel">⌫ 빼기</button>
       <button id="btnClear">🗑</button>
       <button id="btnSound" title="소리">🔊</button>
-      <button id="btnDone">🏁 완성하기</button>
+      <button id="btnDone">완성하기 →</button>
     </div>
   </section>
 </div>
@@ -70,7 +72,7 @@
 <!-- 시작: 번호·이름 -->
 <div id="start" class="overlay show">
   <div class="card">
-    <h1>🚕 제주 헤리티지 자율주행 택시</h1>
+    <h1>제주 헤리티지 자율주행 택시</h1>
     <p class="pickSub">선생님이 알려 준 내 번호를 눌러요</p>
     <div id="numGrid"></div>
     <button class="primary" id="btnStart" disabled>시작하기</button>
@@ -86,7 +88,7 @@
 <div id="toast"></div>
 <canvas id="confetti"></canvas>
 
-<script src="common.js?v=20261115e"></script>
-<script src="planner.js?v=20261115e"></script>
+<script src="common.js?v=20261117k"></script>
+<script src="planner.js?v=20261117k"></script>
 </body>
 </html>

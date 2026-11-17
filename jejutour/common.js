@@ -342,8 +342,14 @@ function expand(prog, base = '', steps = []){
 /* 말한 내용에 그 장소 이름이 들어 있나 (띄어쓰기 무시, 부르는 이름 또는 정식 이름 앞부분) */
 const norm = s => String(s).replace(/[\s·ㆍ『』()\-]/g, '');
 function saysName(text, s){
-  const t = norm(text);
-  return t.includes(norm(s.key)) || t.includes(norm(s.name).slice(0, 4));
+  const t = norm(text), k = norm(s.key);
+  if (t.includes(k) || t.includes(norm(s.name).slice(0, 4))) return true;
+  if (k.length < 3) return false;              // 세 글자 이상 이름은 한 글자 틀려도 인정 (예: 향파두리 → 항파두리)
+  for (let i = 0; i + k.length <= t.length; i++){
+    let diff = 0; for (let j = 0; j < k.length && diff < 2; j++) if (t[i + j] !== k[j]) diff++;
+    if (diff < 2) return true;
+  }
+  return false;
 }
 function calcScore(prog, stamps, crashes){
   let r = 0; walk(prog, b => { if (b.t === 'rep' && (b.body || []).length) r++; });   // 안이 빈 반복은 점수 없음
@@ -489,7 +495,7 @@ const SB3 = (() => {
       return { bytes:new Uint8Array(await blob.arrayBuffer()), fmt:'png' };
     } catch(e){
       if (!window.BACKDROP_JPG) await new Promise((res, rej) => {
-        const s = document.createElement('script'); s.src = 'backdrop.js?v=20261115e'; s.onload = res; s.onerror = () => rej(new Error('backdrop.js 파일이 없어요'));
+        const s = document.createElement('script'); s.src = 'backdrop.js?v=20261117k'; s.onload = res; s.onerror = () => rej(new Error('backdrop.js 파일이 없어요'));
         document.head.appendChild(s);
       });
       const bin = atob(window.BACKDROP_JPG), u8 = new Uint8Array(bin.length);
@@ -508,7 +514,7 @@ const SB3 = (() => {
         sounds:[], volume:100, layerOrder:0, tempo:60, videoTransparency:50, videoState:'on', textToSpeechLanguage:'ko' },
       { isStage:false, name:'오토카', variables:{}, lists:{}, broadcasts:{}, blocks:project(prog, title), comments:{}, currentCostume:0,
         costumes:[{ name:'오토카', bitmapResolution:1, dataFormat:'svg', assetId:carId, md5ext:carId + '.svg', rotationCenterX:37, rotationCenterY:37 }],
-        sounds:[], volume:100, layerOrder:1, visible:true, x:startXY[0], y:startXY[1], size:100, direction:90, draggable:true, rotationStyle:'all around' },
+        sounds:[], volume:100, layerOrder:1, visible:true, x:startXY[0], y:startXY[1], size:100, direction:START.dir * 90, draggable:true, rotationStyle:'all around' },
     ], monitors:[], extensions:['PingPongAutoCar', 'text2speech'], meta:{ semver:'3.0.0', vm:'0.2.0', agent:'jeju-heritage-planner' } };
     return zip([
       { name:'project.json', data:new TextEncoder().encode(JSON.stringify(pj)) },
@@ -600,6 +606,15 @@ function miniMapSVG(spots){
     ${spots.map((s, i) => { const [x, y] = P(s); return `<circle cx="${x}" cy="${y}" r="3.6" fill="#ff6f00" stroke="#fff" stroke-width=".9"/><text x="${x}" y="${y + 1.7}" font-size="4.6" font-weight="900" fill="#fff" text-anchor="middle">${i + 1}</text>`; }).join('')}
   </svg>`;
 }
+/* 여행 계획서 고르기 항목 */
+const STYLE_OPTS = ['📷 사진 명소', '📚 역사 공부', '🌿 자연 힐링', '🎯 체험·활동', '🍊 제주의 맛', '🐢 느긋하게'];
+const AV_OPTS = {
+  '운전이 어려운 여행자':'운전을 못 하거나 힘든 여행자도 혼자서 편하게 다닐 수 있어요.',
+  '길을 모르는 외국인':'길과 말을 몰라도 목적지까지 알아서 데려다줘요.',
+  '안전한 이동':'센서가 주변을 살피며 신호와 속도를 지켜 안전하게 달려요.',
+  '환경을 생각한 이동':'전기 자율주행차로 공유해서 타면 깨끗한 제주를 지킬 수 있어요.',
+  '여유로운 풍경 감상':'운전 대신 창밖 제주 풍경을 마음껏 즐길 수 있어요.',
+};
 function planSheetHTML(rec){
   const t = THEMES[rec.th] || { name:'', icon:'', color:'#1C7557' }, P = makePlan(rec);
   const tl = P.items.map(it => {
@@ -615,13 +630,14 @@ function planSheetHTML(rec){
   return `<div class="planSheet" style="--tc:${t.color}">
     <div class="ptop"><span>🚕 자율주행으로 떠나는 제주 헤리티지 여행 계획서</span><span>${rec.no ? rec.no + '번 여행 플래너' : ''}</span></div>
     <h1>📜 ${esc(rec.cn || t.name + ' 코스')}</h1>
-    <div class="ptags"><span class="th">${t.icon} ${esc(t.name)}</span><span>👥 ${esc(rec.tg || '누구나')}</span>${rec.se ? `<span>🗓 ${esc(rec.se)}</span>` : ''}<span>⏰ 당일치기 ${hhmm(540)}~${hhmm(P.end)}</span>${rec.sc != null ? `<span class="sc">⭐ ${rec.sc}점</span>` : ''}</div>
+    <div class="ptags"><span class="th">${t.icon} ${esc(t.name)}</span><span>👥 ${esc(rec.tg || '누구나')}</span>${rec.se ? `<span>🗓 ${esc(rec.se)}</span>` : ''}${(rec.sy || []).map(v => `<span class="sy">${esc(v)}</span>`).join('')}<span>⏰ 당일치기 ${hhmm(540)}~${hhmm(P.end)}</span>${rec.sc != null ? `<span class="sc">⭐ ${rec.sc}점</span>` : ''}</div>
     <div class="pline">💬 ${rec.ln ? esc(rec.ln) : esc(THEME_DESC[rec.th] || '')}</div>
     <div class="pgrid">
       <div class="ptl">${tl}</div>
       <div class="pside">${miniMapSVG(P.spots)}
         <div class="stats"><div><b>${P.spots.length}곳</b>방문</div><div><b>${P.km}km</b>이동</div><div><b>${P.drive}분</b>자율주행</div>
           <div><b>${(rec.st || []).length}/${P.spots.length}</b>스탬프</div><div><b>${P.blocks}개</b>코드 블록</div><div><b>${P.reps}개</b>반복 블록</div></div>
+        <div class="pbox pav"><h4>🚕 자율주행 포인트</h4><p>${rec.av ? `<b>${esc(rec.av)}</b> · ${esc(AV_OPTS[rec.av] || '')}` : '<span class="pph">자율주행 택시가 필요한 이유를 골라요</span>'}</p></div>
         ${box('💡 이 코스를 추천하는 이유', rec.why, '추천 이유를 적어요')}
         ${box('🎒 준비물 · 여행 팁', rec.tip, '준비물이나 팁을 적어요')}
       </div>
