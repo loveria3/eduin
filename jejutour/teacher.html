@@ -91,6 +91,17 @@ body.present #right h2{font-size:clamp(18px, 1.6vw, 30px);}
 .num-card{border-radius:10px; box-shadow:0 0 0 1px var(--line) inset; font-weight:800;}
 .num-card.sel{background:#1d4ed8; box-shadow:0 0 0 3px #fbbf24;}
 .demoTag{background:var(--point);}
+
+/* 번호판: 번호만, 단순하게 — 보낸 번호 진하게 · 안 보낸 번호 흐리게 · 고른 번호 채움 */
+#nums{background:#fff; gap:6px;}
+.num-card{border-radius:8px; box-shadow:none !important; background:transparent; font-weight:600; letter-spacing:0;}
+.num-card .nm, .num-card .ns{display:none;}
+.num-card .nn{font-size:clamp(14px, 1.25vw, 22px); font-variant-numeric:tabular-nums; letter-spacing:0;}
+.num-card.wait{opacity:1; color:#cbd5e1; background:#f8fafc;}
+.num-card:not(.wait){color:#0f172a; background:#fff; box-shadow:0 0 0 1px #cbd5e1 inset !important; font-weight:700;}
+.num-card:not(.wait):hover{box-shadow:0 0 0 1.5px #0f172a inset !important;}
+.num-card.sel{background:#0f172a !important; color:#fff !important; box-shadow:none !important;}
+.num-card.fresh{animation:freshDot 1.2s ease-in-out 3;} @keyframes freshDot{50%{background:#e0f2fe;}}
 </style>
 </head>
 <body data-step="3">
@@ -151,7 +162,7 @@ function demoData(){
 
 /* ---------- 번호 카드 ---------- */
 function makeCards(){
-  $('nums').innerHTML = Array.from({ length:N }, (_, i) => `<button class="num-card wait" data-no="${i + 1}"><span class="nn">${i + 1}번</span><span class="nm"></span><span class="ns"></span></button>`).join('');
+  $('nums').innerHTML = Array.from({ length:N }, (_, i) => `<button class="num-card wait" data-no="${i + 1}"><span class="nn">${i + 1}</span><span class="nm"></span><span class="ns"></span></button>`).join('');
   $('nums').querySelectorAll('.num-card').forEach(b => b.onclick = () => select(+b.dataset.no));
 }
 function refreshCards(fresh = []){
